@@ -1,7 +1,3 @@
-/**
- * Created by dmadden on 2/20/18.
- */
-
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -11,17 +7,27 @@ import org.apache.hadoop.mapreduce.Reducer;
 import java.io.IOException;
 
 class Job4 {
+  /**
+   * Map output from previous MapReduce job to new < key, value > pair and calculate IDFvalue and TF-IDFvalue
+   * @param LongWritable object that can be ignored
+   * @param Text object that contains all the output from previous MapReduce job
+   * @return Key value pair < docId, {unigram \t TFvalue \t TF-IDFvalue} >
+   */
   static class Job4Mapper extends Mapper<LongWritable, Text, IntWritable, Text> {
     private final IntWritable docId = new IntWritable();
     private final Text compValue = new Text();
 
     private long someCount;
 
+    /**
+     * Get counter value from Driver.java and store in memory
+     * @param Context object that is set in Driver.java
+     */
     @Override
     protected void setup(Context context) throws IOException,
             InterruptedException {
       super.setup(context);
-      this.someCount  = context.getConfiguration().getLong(PA2.CountersClass.N_COUNTERS.SOMECOUNT.name(), 0);
+      this.someCount  = context.getConfiguration().getLong(Driver.CountersClass.N_COUNTERS.SOMECOUNT.name(), 0);
     }
 
     public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
@@ -34,6 +40,7 @@ class Job4 {
       double tf = Double.parseDouble(values[2]);
       double ni = Double.parseDouble(values[3]);
 
+      //N is number of documents counted in Job2
       N = this.someCount;
       idf = Math.log10(N / ni);
       tfidf = tf * idf;
@@ -45,6 +52,12 @@ class Job4 {
     }
   }
 
+  /**
+   * Identity reducer
+   * @param IntWritable object key that is the docId
+   * @param Text object value that is the composite value of {unigram \t TFvalue \t TF-IDFvalue}
+   * @return Write to context key value pair < docId, {unigram \t TFvalue \t TF-IDFvalue} >
+   */
   static class Job4Reducer extends Reducer<IntWritable, Text, IntWritable, Text> {
     private final IntWritable docId = new IntWritable();
     private final Text compValue = new Text();

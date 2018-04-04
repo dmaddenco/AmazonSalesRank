@@ -1,7 +1,3 @@
-/**
- * Created by dmadden on 2/20/18.
- */
-
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -14,6 +10,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 class Job2 {
+  /**
+   * Map results from first MapReduce job to new < key, value > pair
+   * @param LongWritable object that can be ignored
+   * @param Text object that contains all the output from first MapReduce job
+   * @return Key value pair < docId, {unigram \t frequecy} >
+   */
   static class Job2Mapper extends Mapper<LongWritable, Text, IntWritable, Text> {
     private final IntWritable docId = new IntWritable();
     private final Text compValue = new Text();
@@ -29,6 +31,13 @@ class Job2 {
     }
   }
 
+  /**
+   * Calculate TF value for unigram using formula TFij = 0.5 + 0.5 (Fij / MAXk(Fkj))
+   * Count the number of unique documents using docId and Counter object
+   * @param IntWritable docId key
+   * @param Text composite value containing {unigram \t frequency}
+   * @return Write to context the < key, value > pair of < docId, {unigram \t frequency \t TFvalue} >
+   */
   static class Job2Reducer extends Reducer<IntWritable, Text, IntWritable, Text> {
     private final IntWritable docId = new IntWritable();
     private final Text compValue = new Text();
@@ -40,10 +49,13 @@ class Job2 {
       double tf;
       String tempValue;
 
+      //create deep copy of values
       for (Text val : values) {
         valuesCopy.add(val.toString());
       }
 
+      //iterate over ArrayList that contains copy of values
+      //find max frequency
       for (String val : valuesCopy) {
         String[] valuesSplit = val.split("\t");
         int frequency = Integer.parseInt(valuesSplit[1]);
@@ -63,9 +75,10 @@ class Job2 {
         context.write(docId, compValue);
       }
 
+      //count number of unique documents using docId
       if (!uniqueIDs.contains(key.toString())){
         uniqueIDs.add(key.toString());
-        context.getCounter(PA2.CountersClass.N_COUNTERS.SOMECOUNT).increment(1); //Increment the counter
+        context.getCounter(Driver.CountersClass.N_COUNTERS.SOMECOUNT).increment(1); //Increment the counter
       }
     }
   }

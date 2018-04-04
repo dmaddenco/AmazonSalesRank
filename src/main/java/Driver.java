@@ -1,7 +1,3 @@
-/**
- * Created by dmadden on 2/20/18.
- */
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -21,7 +17,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-public class PA2 {
+public class Driver {
 
   public static class CountersClass {
     public enum N_COUNTERS {
@@ -29,12 +25,22 @@ public class PA2 {
     }
   }
 
+  /**
+   * Partitions based on document id and number of reduce tasks
+   *
+   * @param DocIdUniComKey is the composite key that contains {docId \t unigram}
+   * @param IntWritable is the value for the key that can be ignored
+   * @return Modulo result between the document id and the number of reduce tasks set in driver
+   */
   private static class PartitionerInitial extends Partitioner<DocIdUniComKey, IntWritable> {
     public int getPartition(DocIdUniComKey key, IntWritable value, int numReduceTasks) {
       return Math.abs(key.getDocID().hashCode() % numReduceTasks);
     }
   }
 
+  /**
+   * Creates composite key: {docId \t unigram}
+   */
   public static class DocIdUniComKey implements Writable, WritableComparable<DocIdUniComKey> {
     private IntWritable docID = new IntWritable();
     private Text unigram = new Text();
@@ -88,6 +94,7 @@ public class PA2 {
     conf.set("mapred.textoutputformat.separator", "\t");
     int numReduceTask = 32;
 
+    //create all path variables
     Path inputPath = new Path(args[0]);
     Path outputPathTemp1 = new Path(args[1] + "Temp1");
     Path outputPathTemp2 = new Path(args[1] + "Temp2");
@@ -95,13 +102,14 @@ public class PA2 {
     Path outputPathTemp4 = new Path(args[1] + "Temp4");
     Path outputPath = new Path(args[1]);
 
+    //create all job objects
     Job job1 = Job.getInstance(conf, "pa2_job1");
     Job job2 = Job.getInstance(conf, "pa2_job2");
     Job job3 = Job.getInstance(conf, "pa2_job3");
     Job job4 = Job.getInstance(conf, "pa2_job4");
     Job job5 = Job.getInstance(conf, "pa2_job5");
 
-    job1.setJarByClass(PA2.class);
+    job1.setJarByClass(Driver.class);
     job1.setNumReduceTasks(numReduceTask);
     job1.setPartitionerClass(PartitionerInitial.class);
 
@@ -111,10 +119,10 @@ public class PA2 {
     job1.setOutputValueClass(IntWritable.class);
 
     FileInputFormat.addInputPath(job1, inputPath);
-    FileOutputFormat.setOutputPath(job1, outputPathTemp1);
+    FileOutputFormat.setOutputPath(job1, outputPathTemp1);  //jobs write to intermediate output
 
     if (job1.waitForCompletion(true)) {
-      job2.setJarByClass(PA2.class);
+      job2.setJarByClass(Driver.class);
       job2.setNumReduceTasks(numReduceTask);
 
       job2.setMapperClass(Job2.Job2Mapper.class);
@@ -129,9 +137,10 @@ public class PA2 {
       FileOutputFormat.setOutputPath(job2, outputPathTemp2);
 
       if (job2.waitForCompletion(true)) {
-    	Counter count = job2.getCounters().findCounter(CountersClass.N_COUNTERS.SOMECOUNT);
-          
-        job3.setJarByClass(PA2.class);
+        //create counter to keep track of number of documents
+        Counter count = job2.getCounters().findCounter(CountersClass.N_COUNTERS.SOMECOUNT);
+
+        job3.setJarByClass(Driver.class);
         job3.setNumReduceTasks(numReduceTask);
 
         job3.setMapperClass(Job3.Job3Mapper.class);
@@ -146,9 +155,10 @@ public class PA2 {
         FileOutputFormat.setOutputPath(job3, outputPathTemp3);
 
         if (job3.waitForCompletion(true)) {
+          //set job4's counter equal to the value of job3's counter
           job4.getConfiguration().setLong(CountersClass.N_COUNTERS.SOMECOUNT.name(), count.getValue());
 
-          job4.setJarByClass(PA2.class);
+          job4.setJarByClass(Driver.class);
           job4.setNumReduceTasks(numReduceTask);
 
           job4.setMapperClass(Job4.Job4Mapper.class);
@@ -163,18 +173,21 @@ public class PA2 {
           FileOutputFormat.setOutputPath(job4, outputPathTemp4);
 
           if (job4.waitForCompletion(true)) {
+            //TODO: Remove distributed cache and use instead MultipleInputs.addInputPath()
             FileSystem fs = FileSystem.get(conf);
+            //only get file paths that start with "part-r"
             FileStatus[] fileList = fs.listStatus((outputPathTemp4),
                     new PathFilter() {
                       public boolean accept(Path path) {
                         return path.getName().startsWith("part-");
                       }
                     });
+            //adding files to distributed cache
             for (FileStatus aFileList : fileList) {
               job5.addCacheFile((aFileList.getPath().toUri()));
             }
 
-            job5.setJarByClass(PA2.class);
+            job5.setJarByClass(Driver.class);
             job5.setNumReduceTasks(numReduceTask);
 
             job5.setMapperClass(Job5.Job5Mapper.class);
