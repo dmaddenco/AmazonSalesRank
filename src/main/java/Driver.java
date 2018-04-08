@@ -37,6 +37,17 @@ public class Driver {
       return Math.abs(key.getDocID().hashCode() % numReduceTasks);
     }
   }
+  
+  public static class Partitioner0 extends Partitioner<Text,Text>{
+            @Override
+            public int getPartition(Text key, Text value, int numReduceTasks){
+                System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!GOT HERE");
+                System.out.println("*******************************************KEY:" + key.toString() + " VALUE: " + value.toString());
+                int val = Integer.parseInt(key.toString()) % numReduceTasks;
+                //System.out.println("*******************************************KEY:" + key.toString() + " VALUE: " + val);
+                return val;
+            }
+        }
 
   /**
    * Creates composite key: {docId \t unigram}
@@ -96,6 +107,7 @@ public class Driver {
 
     //create all path variables
     Path inputPath = new Path(args[0]);
+    Path outputPathTemp0 = new Path(args[1] + "Temp0");
     Path outputPathTemp1 = new Path(args[1] + "Temp1");
     Path outputPathTemp2 = new Path(args[1] + "Temp2");
     Path outputPathTemp3 = new Path(args[1] + "Temp3");
@@ -103,12 +115,28 @@ public class Driver {
     Path outputPath = new Path(args[1]);
 
     //create all job objects
-    Job job1 = Job.getInstance(conf, "pa2_job1");
-    Job job2 = Job.getInstance(conf, "pa2_job2");
-    Job job3 = Job.getInstance(conf, "pa2_job3");
-    Job job4 = Job.getInstance(conf, "pa2_job4");
-    Job job5 = Job.getInstance(conf, "pa2_job5");
+    Job job0 = Job.getInstance(conf, "tp_job0");
+    Job job1 = Job.getInstance(conf, "tp_job1");
+    Job job2 = Job.getInstance(conf, "tp_job2");
+    Job job3 = Job.getInstance(conf, "tp_job3");
+    Job job4 = Job.getInstance(conf, "tp_job4");
+    Job job5 = Job.getInstance(conf, "tp_job5");
+    
+    job0.setJarByClass(Driver.class);
+    job0.setNumReduceTasks(numReduceTask);
+    //job0.setPartitionerClass(Partitioner0.class);
 
+    job0.setMapperClass(Job0.Job0Mapper.class);
+    job0.setReducerClass(Job0.Job0Reducer.class);
+    job0.setOutputKeyClass(Text.class);
+    job0.setOutputValueClass(Text.class);
+
+    FileInputFormat.addInputPath(job0, inputPath);
+    FileOutputFormat.setOutputPath(job0, outputPathTemp0);  //jobs write to intermediate output
+    
+    System.exit(job0.waitForCompletion(true) ? 0 : 1);
+    /*
+    if (job0.waitForCompletion(true)) {
     job1.setJarByClass(Driver.class);
     job1.setNumReduceTasks(numReduceTask);
     job1.setPartitionerClass(PartitionerInitial.class);
@@ -205,5 +233,6 @@ public class Driver {
         }
       }
     }
+   } */
   }
 }
