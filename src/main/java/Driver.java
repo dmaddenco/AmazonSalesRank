@@ -29,7 +29,7 @@ public class Driver {
    * Partitions based on document id and number of reduce tasks
    *
    * @param DocIdUniComKey is the composite key that contains {docId \t unigram}
-   * @param IntWritable is the value for the key that can be ignored
+   * @param IntWritable    is the value for the key that can be ignored
    * @return Modulo result between the document id and the number of reduce tasks set in driver
    */
   private static class PartitionerInitial extends Partitioner<DocIdUniComKey, IntWritable> {
@@ -37,17 +37,17 @@ public class Driver {
       return Math.abs(key.getDocID().hashCode() % numReduceTasks);
     }
   }
-  
-  public static class Partitioner0 extends Partitioner<Text,Text>{
-            @Override
-            public int getPartition(Text key, Text value, int numReduceTasks){
-                System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!GOT HERE");
-                System.out.println("*******************************************KEY:" + key.toString() + " VALUE: " + value.toString());
-                int val = Integer.parseInt(key.toString()) % numReduceTasks;
-                //System.out.println("*******************************************KEY:" + key.toString() + " VALUE: " + val);
-                return val;
-            }
-        }
+
+  public static class Partitioner0 extends Partitioner<Text, Text> {
+    @Override
+    public int getPartition(Text key, Text value, int numReduceTasks) {
+      System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!GOT HERE");
+      System.out.println("*******************************************KEY:" + key.toString() + " VALUE: " + value.toString());
+      int val = Integer.parseInt(key.toString()) % numReduceTasks;
+      //System.out.println("*******************************************KEY:" + key.toString() + " VALUE: " + val);
+      return val;
+    }
+  }
 
   /**
    * Creates composite key: {docId \t unigram}
@@ -113,6 +113,7 @@ public class Driver {
     Path outputPathTemp3 = new Path(args[1] + "Temp3");
     Path outputPathTemp4 = new Path(args[1] + "Temp4");
     Path outputPath = new Path(args[1]);
+    Path stopWordsPath = new Path(args[2]);
 
     //create all job objects
     Job job0 = Job.getInstance(conf, "tp_job0");
@@ -121,7 +122,7 @@ public class Driver {
     Job job3 = Job.getInstance(conf, "tp_job3");
     Job job4 = Job.getInstance(conf, "tp_job4");
     Job job5 = Job.getInstance(conf, "tp_job5");
-    
+
     job0.setJarByClass(Driver.class);
     job0.setNumReduceTasks(numReduceTask);
     //job0.setPartitionerClass(Partitioner0.class);
@@ -133,7 +134,7 @@ public class Driver {
 
     FileInputFormat.addInputPath(job0, inputPath);
     FileOutputFormat.setOutputPath(job0, outputPathTemp0);  //jobs write to intermediate output
-    
+
     System.exit(job0.waitForCompletion(true) ? 0 : 1);
     /*
     if (job0.waitForCompletion(true)) {
@@ -161,6 +162,7 @@ public class Driver {
       job2.setOutputKeyClass(IntWritable.class);
       job2.setOutputValueClass(Text.class);
 
+      MultipleInputs.addInputPath(job2, stopWordsPath, TextInputFormat.class, Job2.Job2Mapper.class);
       FileInputFormat.addInputPath(job2, outputPathTemp1);
       FileOutputFormat.setOutputPath(job2, outputPathTemp2);
 
