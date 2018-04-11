@@ -9,7 +9,7 @@ import java.util.ArrayList;
 class Job4 {
   /**
    * Map output from previous MapReduce job of < asin, {unigram /t TFValue /t salesRank} >
-   *   to new < key, value > pair and calculate IDF value
+   * to new < key, value > pair and calculate IDF value
    *
    * @param LongWritable object that can be ignored
    * @param Text         object that contains all the output from previous MapReduce job
@@ -36,7 +36,7 @@ class Job4 {
    * Identity reducer
    *
    * @param Text object key that is the unigram
-   * @param Text        object value that is the composite value of {asin \t TFValue \t salesRank}
+   * @param Text object value that is the composite value of {asin \t TFValue \t salesRank}
    * @return Write to context key value pair < unigram, {asin \t TFValue \t ni \t salesRank} >
    */
   static class Job4Reducer extends Reducer<Text, Text, Text, Text> {
