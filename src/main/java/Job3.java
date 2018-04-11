@@ -25,9 +25,9 @@ class Job3 {
       String[] keyArray = key.toString().split("\t");
       String[] valueArray = value.toString().split("\t");
       String asin = keyArray[0];
-      String unigram = keyArray[0];
-      String frequency = valueArray[0];
-      String salesRank = valueArray[1];
+      String unigram = keyArray[1];
+      String frequency = valueArray[2];
+      String salesRank = valueArray[3];
 
       compKey.set(asin);
       compValue.set(unigram + "\t" + frequency + "\t" + salesRank);
