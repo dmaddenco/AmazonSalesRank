@@ -17,7 +17,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-public class ProjectDriver {
+public class Driver {
 
   public static class CountersClass {
     public enum N_COUNTERS {
@@ -124,7 +124,7 @@ public class ProjectDriver {
     Job job5 = Job.getInstance(conf, "tp_job5");
     Job job6 = Job.getInstance(conf, "tp_job6");
 
-    job0.setJarByClass(ProjectDriver.class);
+    job0.setJarByClass(Driver.class);
     job0.setNumReduceTasks(numReduceTask);
     //job0.setPartitionerClass(Partitioner0.class);
 
@@ -139,7 +139,7 @@ public class ProjectDriver {
     System.exit(job0.waitForCompletion(true) ? 0 : 1);
     /*
     if (job0.waitForCompletion(true)) {
-    job1.setJarByClass(ProjectDriver.class);
+    job1.setJarByClass(Driver.class);
     job1.setNumReduceTasks(numReduceTask);
     job1.setPartitionerClass(PartitionerInitial.class);
 
@@ -152,7 +152,7 @@ public class ProjectDriver {
     FileOutputFormat.setOutputPath(job1, outputPathTemp1);  //jobs write to intermediate output
 
     if (job1.waitForCompletion(true)) {
-      job2.setJarByClass(ProjectDriver.class);
+      job2.setJarByClass(Driver.class);
       job2.setNumReduceTasks(numReduceTask);
 
       job2.setMapperClass(Job2.Job2Mapper.class);
@@ -171,7 +171,7 @@ public class ProjectDriver {
         //create counter to keep track of number of documents
         Counter count = job2.getCounters().findCounter(CountersClass.N_COUNTERS.SOMECOUNT);
 
-        job3.setJarByClass(ProjectDriver.class);
+        job3.setJarByClass(Driver.class);
         job3.setNumReduceTasks(numReduceTask);
 
         job3.setMapperClass(Job3.Job3Mapper.class);
@@ -189,7 +189,7 @@ public class ProjectDriver {
           //set job4's counter equal to the value of job3's counter
           job4.getConfiguration().setLong(CountersClass.N_COUNTERS.SOMECOUNT.name(), count.getValue());
 
-          job4.setJarByClass(ProjectDriver.class);
+          job4.setJarByClass(Driver.class);
           job4.setNumReduceTasks(numReduceTask);
 
           job4.setMapperClass(Job4.Job4Mapper.class);
@@ -218,7 +218,7 @@ public class ProjectDriver {
               job5.addCacheFile((aFileList.getPath().toUri()));
             }
 
-            job5.setJarByClass(ProjectDriver.class);
+            job5.setJarByClass(Driver.class);
             job5.setNumReduceTasks(numReduceTask);
 
             job5.setMapperClass(Job5.Job5Mapper.class);
