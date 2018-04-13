@@ -88,27 +88,27 @@ class Job6 {
         for (String sentence : sentences) {
           if (!sentence.equals("")) {
             StringTokenizer itrWord = new StringTokenizer(sentence);
-            TreeMap<String, Double> top5Words = new TreeMap<String, Double>();
-            TreeMap<Double, String> top5WordsTFIDF = new TreeMap<Double, String>();
+            TreeMap<String, Double> top10Words = new TreeMap<String, Double>();
+            TreeMap<Double, String> top10WordsTFIDF = new TreeMap<Double, String>();
 
             while (itrWord.hasMoreTokens() && !stopWords.contains(itrWord.toString())) {
               String unigram = itrWord.nextToken().toLowerCase().replaceAll("[^a-z0-9 ]", "");
               String mapKey = asin + "\t" + unigram;
-              if (!top5Words.containsKey(mapKey) && asinUniToValue.containsKey(mapKey)) {
+              if (!top10Words.containsKey(mapKey) && asinUniToValue.containsKey(mapKey)) {
                 double tfidf = Double.parseDouble(asinUniToValue.get(mapKey).split("\t")[1]);
-                top5Words.put(mapKey, tfidf);
-                top5WordsTFIDF.put(tfidf, mapKey);
+                top10Words.put(mapKey, tfidf);
+                top10WordsTFIDF.put(tfidf, mapKey);
 
-                if (top5Words.size() > 5) {
-                  String firstKey = top5WordsTFIDF.get(top5WordsTFIDF.firstKey());
-                  top5Words.remove(firstKey);
-                  top5WordsTFIDF.remove(top5WordsTFIDF.firstKey());
+                if (top10Words.size() > 10) {
+                  String firstKey = top10WordsTFIDF.get(top10WordsTFIDF.firstKey());
+                  top10Words.remove(firstKey);
+                  top10WordsTFIDF.remove(top10WordsTFIDF.firstKey());
                 }
               }
             }
 
             double productTFIDF = 0;
-            for (double f : top5Words.values()) {
+            for (double f : top10Words.values()) {
               productTFIDF += f;
             }
 
@@ -123,56 +123,17 @@ class Job6 {
   }
 
   static class Job6Reducer extends Reducer<Text, Text, Text, Text> {
-    private static TreeMap<String, Double> top3 = new TreeMap<String, Double>();
-    private static TreeMap<Double, String> top3TFIDF = new TreeMap<Double, String>();
-    private final Text docId = new Text();
-    private final Text top3Sentences = new Text();
+    private final Text asin = new Text();
+    private final Text comKey = new Text();
 
     public void reduce(Text key, Iterable<Text> values, Context context)
             throws IOException, InterruptedException {
-      top3 = new TreeMap<String, Double>();
-      top3TFIDF = new TreeMap<Double, String>();
 
-      for (Text sentenceAndTFIDF : values) {
-
-        if (!top3.containsKey(sentenceAndTFIDF.toString())) {
-          String[] sentenceInfo = sentenceAndTFIDF.toString().split("\t");
-          String sentenceOrder = sentenceInfo[0];
-          String sentence = sentenceInfo[1];
-          double tfidf = Double.parseDouble(sentenceInfo[2]);
-          top3.put(sentenceOrder + "\t" + sentence, tfidf);
-          top3TFIDF.put(tfidf, sentenceOrder + "\t" + sentence);
-
-          if (top3.size() > 3) {
-            Double lowestValue = top3TFIDF.firstKey();
-            String mapKey = null;
-            Set<String> keys = top3.keySet();
-
-            for (String k : keys) {
-              if (top3.get(k).equals(lowestValue)) {
-                top3TFIDF.remove(lowestValue);
-                mapKey = k;
-                break;
-              }
-            }
-
-            top3.remove(mapKey);
-          }
-        }
+      asin.set(key);
+      for (Text v : values) {
+        comKey.set(v);
+        context.write(asin, comKey);
       }
-
-      String tempValue = "";
-      Set<String> keys = top3.keySet();
-      for (String k : keys) {
-        String[] kContent = k.split("\t");
-        if (kContent.length == 2) {
-          tempValue += kContent[1] + ".";
-        }
-      }
-
-      docId.set(key.toString());
-      top3Sentences.set(tempValue);
-      context.write(docId, top3Sentences);
     }
   }
 }
