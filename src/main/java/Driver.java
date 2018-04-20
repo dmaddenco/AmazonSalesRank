@@ -49,7 +49,9 @@ public class Driver {
     int numReduceTask = 32;
 
     //create all path variables
-    //Path inputPath = new Path(args[0]);
+    Path stopWordsInputPath = new Path(args[0]);
+    Path metaDataInputPath = new Path(args[1]);
+    Path reviewDataInputPath = new Path(args[2]);
     Path outputPathTemp1 = new Path(args[3] + "Temp1");
     Path outputPathTemp2 = new Path(args[3] + "Temp2");
     Path outputPathTemp3 = new Path(args[3] + "Temp3");
@@ -72,8 +74,8 @@ public class Driver {
     job1.setOutputKeyClass(Text.class);
     job1.setOutputValueClass(Text.class);
 
-    MultipleInputs.addInputPath(job1, new Path(args[1]), TextInputFormat.class, Job1.Job0Mapper.class);
-    MultipleInputs.addInputPath(job1, new Path(args[2]), TextInputFormat.class, Job1.Job1Mapper.class);
+    MultipleInputs.addInputPath(job1, metaDataInputPath, TextInputFormat.class, Job1.Job0Mapper.class);
+    MultipleInputs.addInputPath(job1, reviewDataInputPath, TextInputFormat.class, Job1.Job1Mapper.class);
     FileOutputFormat.setOutputPath(job1, outputPathTemp1);  //jobs write to intermediate output
 
     System.exit(job1.waitForCompletion(true) ? 0 : 1);
