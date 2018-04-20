@@ -84,20 +84,26 @@ class Job1 {
    * @return (asin, reviewText)
    */
   static class Job1Mapper extends Mapper<Object, Text, Text, Text> {
-    private final static Text asin = new Text();
-    private final static Text data = new Text();
+    private final static Text asinKey = new Text();
+    private final static Text reviewValue = new Text();
 
     public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
-      String reviews = value.toString();
-      if (!reviews.isEmpty()) {
-        HashMap<String, Object> map = new ObjectMapper().readValue(reviews, HashMap.class);
-        String tempAsin = map.get("asin").toString();
-        String reviewText = map.get("reviewText").toString();
+      HashMap<String, Object> map = new ObjectMapper().configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true).readValue(value.toString(), HashMap.class);
 
-        asin.set(tempAsin);
-        data.set(reviewText);
-        context.write(asin, data);
+      String asin = "";
+      String reviewText = "";
 
+      if (map.containsKey("asin")) {
+        asin = map.get("asin").toString();
+      }
+      if (map.containsKey("reviewText")) {
+        reviewText = map.get("reviewText").toString();
+      }
+
+      if (!asin.equals("") && !reviewText.equals("")) {
+        asinKey.set(asin);
+        reviewValue.set(reviewText);
+        context.write(asinKey, reviewValue);
       }
     }
   }
