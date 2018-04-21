@@ -49,14 +49,14 @@ public class Driver {
     int numReduceTask = 32;
 
     //create all path variables
-    Path stopWordsInputPath = new Path(args[0]);
-    Path metaDataInputPath = new Path(args[1]);
-    Path reviewDataInputPath = new Path(args[2]);
-    Path outputPathTemp1 = new Path(args[3] + "Temp1");
-    Path outputPathTemp2 = new Path(args[3] + "Temp2");
-    Path outputPathTemp3 = new Path(args[3] + "Temp3");
-    Path outputPathTemp4 = new Path(args[3] + "Temp4");
-    Path outputPath = new Path(args[3]);
+    Path stopWordsInputPath = new Path(args[1]);
+    Path metaDataInputPath = new Path(args[2]);
+    Path reviewDataInputPath = new Path(args[3]);
+    Path outputPathTemp1 = new Path(args[4] + "Temp1");
+    Path outputPathTemp2 = new Path(args[4] + "Temp2");
+    Path outputPathTemp3 = new Path(args[4] + "Temp3");
+    Path outputPathTemp4 = new Path(args[4] + "Temp4");
+    Path outputPath = new Path(args[4]);
 
     //create all job objects
     Job job1 = Job.getInstance(conf, "tp_job1");
@@ -78,24 +78,31 @@ public class Driver {
     MultipleInputs.addInputPath(job1, reviewDataInputPath, TextInputFormat.class, Job1.Job1Mapper.class);
     FileOutputFormat.setOutputPath(job1, outputPathTemp1);  //jobs write to intermediate output
 
-    System.exit(job1.waitForCompletion(true) ? 0 : 1);
-    /*if (job1.waitForCompletion(true)) {
+    if (job1.waitForCompletion(true)) {
       job2.setJarByClass(Driver.class);
       job2.setNumReduceTasks(numReduceTask);
-
+      //job2.setPartitionerClass(PartitionerAsin.class);
+      
       job2.setMapperClass(Job2.Job2Mapper.class);
       job2.setReducerClass(Job2.Job2Reducer.class);
 
-      job2.setMapOutputKeyClass(IntWritable.class);
+      job2.setMapOutputKeyClass(Text.class);
       job2.setMapOutputValueClass(Text.class);
-      job2.setOutputKeyClass(IntWritable.class);
+      job2.setOutputKeyClass(Text.class);
       job2.setOutputValueClass(Text.class);
+      
+      FileSystem fs = FileSystem.get(conf);
+    FileStatus[] fileList = fs.listStatus(new Path(args[1]));
+    
+    for(int i=0; i < fileList.length;i++){ 
+        job2.addCacheFile(fileList[i].getPath().toUri());
+    }
 
-      MultipleInputs.addInputPath(job2, stopWordsPath, TextInputFormat.class, Job2.Job2Mapper.class);
       FileInputFormat.addInputPath(job2, outputPathTemp1);
       FileOutputFormat.setOutputPath(job2, outputPathTemp2);
-
-      if (job2.waitForCompletion(true)) {
+      
+    System.exit(job2.waitForCompletion(true) ? 0 : 1);
+      /*if (job2.waitForCompletion(true)) {
         //create counter to keep track of number of documents
         Counter count = job2.getCounters().findCounter(CountersClass.N_COUNTERS.SOMECOUNT);
 
@@ -162,7 +169,7 @@ public class Driver {
             System.exit(job5.waitForCompletion(true) ? 0 : 1);
           }
         }
-      }
-    }*/
+      }*/
+    }
   }
 }
