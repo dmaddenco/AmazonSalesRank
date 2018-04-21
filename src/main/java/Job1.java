@@ -22,36 +22,37 @@ class Job1 {
    * @return (asin, rank)
    */
   public static class Job0Mapper extends Mapper<Object, Text, Text, Text> {
-    //private final static DocComposite doc = new DocComposite();
-//    private final static Text asin = new Text();
     private final static Text asinKey = new Text();
     private final static Text rank = new Text();
 
     public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
-//      String meta = value.toString();
-//      if (!meta.isEmpty()) {
-//        if (meta.contains("asin") && meta.contains("'salesRank': {'Electronics':")) {
-//
-//          StringTokenizer itrWord = new StringTokenizer(meta);
-//
-//          while (itrWord.hasMoreTokens()) {
-//            String unigram = itrWord.nextToken().toLowerCase().replaceAll("[^A-Za-z0-9]", "");
-//            if (unigram.equals("asin")) {
-//              String num = itrWord.nextToken().toLowerCase().replaceAll("[^A-Za-z0-9]", "");
-//              asin.set(num);
-//            }
-//            if (unigram.equals("salesrank")) {
-//              String temp = itrWord.nextToken();
-//              String electronicText = itrWord.nextToken().toLowerCase().replaceAll("[^A-Za-z0-9]", "");
-//              rank.set(electronicText);
-//            }
-//          }
-//          context.write(asin, rank);
-//        }
-//      }
+      String meta = value.toString();
+      if (!meta.isEmpty()) {
+        if (meta.contains("asin") && meta.contains("'salesRank': {'Electronics':")) {
+
+          StringTokenizer itrWord = new StringTokenizer(meta);
+
+          while (itrWord.hasMoreTokens()) {
+            String unigram = itrWord.nextToken().toLowerCase().replaceAll("[^A-Za-z0-9]", "");
+            if (unigram.equals("asin")) {
+              String num = itrWord.nextToken().toLowerCase().replaceAll("[^A-Za-z0-9]", "");
+              asinKey.set(num);
+            }
+            if (unigram.equals("salesrank")) {
+              String temp = itrWord.nextToken();
+              String electronicText = itrWord.nextToken().toLowerCase().replaceAll("[^A-Za-z0-9]", "");
+              rank.set(electronicText);
+            }
+          }
+          context.write(asinKey, rank);
+        }
+      }
+
+      /*
       HashMap<String, Object> map = new ObjectMapper().configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true)
               .configure(JsonParser.Feature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER, true)
               .readValue(value.toString(), HashMap.class);
+
       String asin = "";
       String salesRank = "";
 
@@ -78,7 +79,7 @@ class Job1 {
         rank.set(salesRank);
         context.write(asinKey, rank);
       }
-
+      */
     }
   }
 
