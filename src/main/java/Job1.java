@@ -49,7 +49,9 @@ class Job1 {
 //          context.write(asin, rank);
 //        }
 //      }
-      HashMap<String, Object> map = new ObjectMapper().configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true).readValue(value.toString(), HashMap.class);
+      HashMap<String, Object> map = new ObjectMapper().configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true)
+              .configure(JsonParser.Feature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER, true)
+              .readValue(value.toString(), HashMap.class);
       String asin = "";
       String salesRank = "";
 
@@ -58,12 +60,16 @@ class Job1 {
       }
       if (map.containsKey("salesRank")) {
         String temp = map.get("salesRank").toString();
-        JSONObject nestedKey;
-        try {
-          nestedKey = new JSONObject(temp);
-          salesRank = nestedKey.get("Electronics").toString();
-        } catch (JSONException e) {
-          e.printStackTrace();
+        if (temp.contains("Electronics")) {
+          JSONObject nestedKey;
+          try {
+            nestedKey = new JSONObject(temp);
+            if (nestedKey.has("Electronics")) {
+              salesRank = nestedKey.get("Electronics").toString();
+            }
+          } catch (JSONException e) {
+            e.printStackTrace();
+          }
         }
       }
 
@@ -121,9 +127,9 @@ class Job1 {
     private String combo = "";
 
     public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
-
       String rank = "";
       String reviewText = "";
+
       for (Text val : values) {
         String temp = val.toString();
         char myChar = temp.charAt(0);
