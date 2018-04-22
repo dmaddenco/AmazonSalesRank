@@ -101,14 +101,14 @@ public class Driver {
       FileInputFormat.addInputPath(job2, outputPathTemp1);
       FileOutputFormat.setOutputPath(job2, outputPathTemp2);
       
-    System.exit(job2.waitForCompletion(true) ? 0 : 1);
-      /*if (job2.waitForCompletion(true)) {
+      if (job2.waitForCompletion(true)) {
         //create counter to keep track of number of documents
         Counter count = job2.getCounters().findCounter(CountersClass.N_COUNTERS.SOMECOUNT);
 
         job3.setJarByClass(Driver.class);
         job3.setNumReduceTasks(numReduceTask);
-
+        //job3.setPartitionerClass(PartitionerAsin.class);
+        
         job3.setMapperClass(Job3.Job3Mapper.class);
         job3.setReducerClass(Job3.Job3Reducer.class);
 
@@ -120,7 +120,8 @@ public class Driver {
         FileInputFormat.addInputPath(job3, outputPathTemp2);
         FileOutputFormat.setOutputPath(job3, outputPathTemp3);
 
-        if (job3.waitForCompletion(true)) {
+        System.exit(job3.waitForCompletion(true) ? 0 : 1);
+        /*if (job3.waitForCompletion(true)) {
           //set job4's counter equal to the value of job3's counter
           job4.getConfiguration().setLong(CountersClass.N_COUNTERS.SOMECOUNT.name(), count.getValue());
 
@@ -168,8 +169,8 @@ public class Driver {
             FileOutputFormat.setOutputPath(job5, outputPath);
             System.exit(job5.waitForCompletion(true) ? 0 : 1);
           }
-        }
-      }*/
+        }*/
+      }
     }
   }
 }

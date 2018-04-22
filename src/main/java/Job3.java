@@ -22,10 +22,10 @@ class Job3 {
 
     public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
       Set<String> uniqueASIN = new HashSet<String>();
-      String[] keyArray = key.toString().split("\t");
       String[] valueArray = value.toString().split("\t");
-      String asin = keyArray[0];
-      String unigram = keyArray[1];
+      
+      String asin = valueArray[0];
+      String unigram = valueArray[1];
       String frequency = valueArray[2];
       String salesRank = valueArray[3];
 
