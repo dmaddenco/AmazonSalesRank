@@ -120,8 +120,8 @@ public class Driver {
         FileInputFormat.addInputPath(job3, outputPathTemp2);
         FileOutputFormat.setOutputPath(job3, outputPathTemp3);
 
-        System.exit(job3.waitForCompletion(true) ? 0 : 1);
-        /*if (job3.waitForCompletion(true)) {
+        //System.exit(job3.waitForCompletion(true) ? 0 : 1);
+        if (job3.waitForCompletion(true)) {
           //set job4's counter equal to the value of job3's counter
           job4.getConfiguration().setLong(CountersClass.N_COUNTERS.SOMECOUNT.name(), count.getValue());
 
@@ -131,15 +131,16 @@ public class Driver {
           job4.setMapperClass(Job4.Job4Mapper.class);
           job4.setReducerClass(Job4.Job4Reducer.class);
 
-          job4.setMapOutputKeyClass(IntWritable.class);
+          job4.setMapOutputKeyClass(Text.class);
           job4.setMapOutputValueClass(Text.class);
-          job4.setOutputKeyClass(IntWritable.class);
+          job4.setOutputKeyClass(Text.class);
           job4.setOutputValueClass(Text.class);
 
           FileInputFormat.addInputPath(job4, outputPathTemp3);
           FileOutputFormat.setOutputPath(job4, outputPathTemp4);
 
-          if (job4.waitForCompletion(true)) {
+          System.exit(job4.waitForCompletion(true) ? 0 : 1);
+          /*if (job4.waitForCompletion(true)) {
             //TODO: Remove distributed cache and use instead MultipleInputs.addInputPath()
             FileSystem fs = FileSystem.get(conf);
             //only get file paths that start with "part-r"
@@ -168,8 +169,8 @@ public class Driver {
             //FileInputFormat.addInputPath(job5, inputPath);
             FileOutputFormat.setOutputPath(job5, outputPath);
             System.exit(job5.waitForCompletion(true) ? 0 : 1);
-          }
-        }*/
+          }*/
+        }
       }
     }
   }
