@@ -47,7 +47,7 @@ class Job5 {
       N = this.someCount;
       idf = Math.log10(N / ni);
       tfidf = tf * idf;
-
+      
       asinKey.set(asin);
       compValue.set(unigram + "\t" + tf + "\t" + tfidf + "\t" + salesRank);
       context.write(asinKey, compValue);
