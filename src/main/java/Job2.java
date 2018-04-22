@@ -24,7 +24,9 @@ class Job2 {
   static class Job2Mapper extends Mapper<LongWritable, Text, Text, Text> {
     private final Text compKey = new Text();
     private final Text compValue = new Text();
-
+    
+    private Text testKey = new Text();
+    private Text testVal = new Text();
     /**
      * Read in from multiple inputs and store results in memory
      * File input contains stop words to be used as a filter in mapper
@@ -40,8 +42,10 @@ class Job2 {
           for (URI cacheFile1 : cacheFiles) {
             try {
               File cacheFile = new File(cacheFile1.getPath());
-              reader = new BufferedReader(new FileReader(cacheFile));
+              
+              reader = new BufferedReader(new FileReader(cacheFile.getName()));
               String line;
+              
               while ((line = reader.readLine()) != null) {
                 line = line.toLowerCase().replaceAll("[^a-z0-9 ]", "");
                 stopWords.add(line);
@@ -64,21 +68,25 @@ class Job2 {
 
     public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
       String[] inputArray = value.toString().split("\t");
+      
       if (inputArray.length >= 3) {
         String asin = inputArray[0];
         String reviews = inputArray[1];
         String salesRank = inputArray[2];
         String[] sentences = reviews.split("\\.");
-
+        
         for (String sentence : sentences) {
           if (!sentence.equals("")) {
             StringTokenizer itrWord = new StringTokenizer(sentence);
 
-            while (itrWord.hasMoreTokens() && !stopWords.contains(itrWord.toString())) {
+            while (itrWord.hasMoreTokens()) {
               String unigram = itrWord.nextToken().toLowerCase().replaceAll("[^a-z0-9 ]", "");
+              
+              if(!stopWords.contains(unigram)){
               compKey.set(asin + "\t" + unigram);
               compValue.set(1 + "\t" + salesRank);
               context.write(compKey, compValue);
+              }
             }
           }
         }

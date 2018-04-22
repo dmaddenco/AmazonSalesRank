@@ -22,12 +22,12 @@ class Job3 {
 
     public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
       Set<String> uniqueASIN = new HashSet<String>();
-      String[] keyArray = key.toString().split("\t");
       String[] valueArray = value.toString().split("\t");
-      String asin = keyArray[0];
-      String unigram = keyArray[0];
-      String frequency = valueArray[0];
-      String salesRank = valueArray[1];
+      
+      String asin = valueArray[0];
+      String unigram = valueArray[1];
+      String frequency = valueArray[2];
+      String salesRank = valueArray[3];
 
       compKey.set(asin);
       compValue.set(unigram + "\t" + frequency + "\t" + salesRank);
@@ -45,7 +45,7 @@ class Job3 {
    *
    * @param Text object key that is the asin
    * @param Text object value that is composite value of {unigram \t frequency \t salesRank}
-   * @return Write to context the < key, value > pair of < asin, {unigram \t frequency \t TFvalue \t salesRank} >
+   * @return Write to context the < key, value > pair of < asin, {unigram \t TFvalue \t salesRank} >
    */
   static class Job3Reducer extends Reducer<Text, Text, Text, Text> {
     private final Text compKey = new Text();
@@ -75,7 +75,7 @@ class Job3 {
         String salesRank = valuesSplit[2];
         tf = 0.5 + 0.5 * (frequency / maxFreq);
         compKey.set(key);
-        compValue.set(unigram + "\t" + frequency + "\t" + tf + "\t" + salesRank);
+        compValue.set(unigram + "\t" + tf + "\t" + salesRank);
         context.write(compKey, compValue);
       }
     }
