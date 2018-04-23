@@ -56,6 +56,7 @@ public class Driver {
     Path outputPathTemp2 = new Path(args[4] + "Temp2");
     Path outputPathTemp3 = new Path(args[4] + "Temp3");
     Path outputPathTemp4 = new Path(args[4] + "Temp4");
+    Path outputPathTemp5 = new Path(args[4] + "Temp5");
     Path outputPath = new Path(args[4]);
 
     //create all job objects
@@ -102,8 +103,6 @@ public class Driver {
       FileOutputFormat.setOutputPath(job2, outputPathTemp2);
       
       if (job2.waitForCompletion(true)) {
-        //create counter to keep track of number of documents
-        Counter count = job2.getCounters().findCounter(CountersClass.N_COUNTERS.SOMECOUNT);
 
         job3.setJarByClass(Driver.class);
         job3.setNumReduceTasks(numReduceTask);
@@ -122,8 +121,6 @@ public class Driver {
 
         //System.exit(job3.waitForCompletion(true) ? 0 : 1);
         if (job3.waitForCompletion(true)) {
-          //set job4's counter equal to the value of job3's counter
-          job4.getConfiguration().setLong(CountersClass.N_COUNTERS.SOMECOUNT.name(), count.getValue());
 
           job4.setJarByClass(Driver.class);
           job4.setNumReduceTasks(numReduceTask);
@@ -139,37 +136,28 @@ public class Driver {
           FileInputFormat.addInputPath(job4, outputPathTemp3);
           FileOutputFormat.setOutputPath(job4, outputPathTemp4);
 
-          System.exit(job4.waitForCompletion(true) ? 0 : 1);
-          /*if (job4.waitForCompletion(true)) {
-            //TODO: Remove distributed cache and use instead MultipleInputs.addInputPath()
-            FileSystem fs = FileSystem.get(conf);
-            //only get file paths that start with "part-r"
-            FileStatus[] fileList = fs.listStatus((outputPathTemp4),
-                    new PathFilter() {
-                      public boolean accept(Path path) {
-                        return path.getName().startsWith("part-");
-                      }
-                    });
-            //adding files to distributed cache
-            for (FileStatus aFileList : fileList) {
-              job5.addCacheFile((aFileList.getPath().toUri()));
-            }
-
+          //System.exit(job4.waitForCompletion(true) ? 0 : 1);
+          if (job4.waitForCompletion(true)) {
+            
             job5.setJarByClass(Driver.class);
             job5.setNumReduceTasks(numReduceTask);
-
+            //job5.setPartitionerClass(PartitionerAsin.class);
+            
             job5.setMapperClass(Job5.Job5Mapper.class);
             job5.setReducerClass(Job5.Job5Reducer.class);
 
-            job5.setMapOutputKeyClass(IntWritable.class);
+            job5.setMapOutputKeyClass(Text.class);
             job5.setMapOutputValueClass(Text.class);
-            job5.setOutputKeyClass(IntWritable.class);
+            job5.setOutputKeyClass(Text.class);
             job5.setOutputValueClass(Text.class);
+            
+            Counter someCount = job3.getCounters().findCounter(CountersClass.N_COUNTERS.SOMECOUNT);
+            job5.getConfiguration().setLong(CountersClass.N_COUNTERS.SOMECOUNT.name(), someCount.getValue());
 
-            //FileInputFormat.addInputPath(job5, inputPath);
-            FileOutputFormat.setOutputPath(job5, outputPath);
+            FileInputFormat.addInputPath(job5, outputPathTemp4);
+            FileOutputFormat.setOutputPath(job5, outputPathTemp5);
             System.exit(job5.waitForCompletion(true) ? 0 : 1);
-          }*/
+          }
         }
       }
     }
