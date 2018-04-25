@@ -18,7 +18,6 @@ class Job6 {
     private final Text salesRankKey = new Text();
     private final Text tfidfValue = new Text();
 
-    @Override
     public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
       String[] values = value.toString().split("\t");
 
