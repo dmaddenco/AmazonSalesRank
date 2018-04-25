@@ -7,6 +7,7 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.StringTokenizer;
 
@@ -95,7 +96,8 @@ class Job1 {
     private final static Text reviewValue = new Text();
 
     public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
-      HashMap<String, Object> map = new ObjectMapper().configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true).readValue(value.toString(), HashMap.class);
+      HashMap<String, Object> map = new ObjectMapper().configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true)
+              .readValue(value.toString(), HashMap.class);
 
       String asin = "";
       String reviewText = "";
@@ -104,7 +106,8 @@ class Job1 {
         asin = map.get("asin").toString();
       }
       if (map.containsKey("reviewText")) {
-        reviewText = map.get("reviewText").toString();
+        reviewText = map.get("reviewText").toString().replaceAll("[^A-Za-z0-9 ]", "")
+                .replaceAll("\\s+", " ");
       }
 
       if (!asin.equals("") && !reviewText.equals("")) {
@@ -128,19 +131,31 @@ class Job1 {
     private String combo = "";
 
     public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
+      ArrayList<String> valuesArrayList = new ArrayList<String>();
       String rank = "";
       String reviewText = "";
 
       for (Text val : values) {
-        String temp = val.toString();
-        char myChar = temp.charAt(0);
+        valuesArrayList.add(val.toString());
+      }
 
-        if (Character.isDigit(myChar)) {
-          rank = temp;
-        } else {
-          reviewText = temp;
+      if (valuesArrayList.size() >= 2) {
+        try {
+          int rankTest = Integer.parseInt(valuesArrayList.get(0));
+          rank = valuesArrayList.get(0);
+          if (valuesArrayList.size() > 2) {
+            for (int i = 1; i < valuesArrayList.size(); i++) {
+              reviewText += valuesArrayList.get(i) + " ";
+            }
+          } else {
+            reviewText = valuesArrayList.get(1);
+          }
+        } catch (Exception e) {
+          rank = "";
+          reviewText = "";
         }
       }
+
       if (!reviewText.isEmpty() && !rank.isEmpty()) {
         combo = reviewText + "\t" + rank;
         result.set(combo);
