@@ -23,7 +23,7 @@ class Job3 {
     public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
       Set<String> uniqueASIN = new HashSet<String>();
       String[] valueArray = value.toString().split("\t");
-      
+
       String asin = valueArray[0];
       String unigram = valueArray[1];
       String frequency = valueArray[2];
@@ -33,7 +33,7 @@ class Job3 {
       compValue.set(unigram + "\t" + frequency + "\t" + salesRank);
       context.write(compKey, compValue);
 
-      if (!uniqueASIN.contains(asin)){
+      if (!uniqueASIN.contains(asin)) {
         uniqueASIN.add(asin);
         context.getCounter(Driver.CountersClass.N_COUNTERS.SOMECOUNT).increment(1); //Increment the counter
       }

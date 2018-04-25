@@ -22,13 +22,11 @@ class Job6 {
       String[] values = value.toString().split("\t");
 
       if (values.length == 5) {
-        String asin = values[0];
-        String unigram = values[1];
-        String tfValue = values[2];
+//        String asin = values[0];
+//        String unigram = values[1];
+//        String tfValue = values[2];
         String tfidf = values[3];
         String salesRank = values[4];
-//        String mapKey = asin + "\t" + unigram;
-//        String mapValue = tfidfValue + "\t" + salesRank;
         salesRankKey.set(salesRank);
         tfidfValue.set(tfidf);
         context.write(salesRankKey, tfidfValue);
@@ -59,10 +57,10 @@ class Job6 {
       }
 
       int i = 0;
-      for(Map.Entry<Double,String> entry : productTFIDF.entrySet()) {
+      for (Map.Entry<Double, String> entry : productTFIDF.entrySet()) {
         if (i < 10) {
           Double tfIDF = entry.getKey();
-          String value = entry.getValue();
+//          String value = entry.getValue();
           rangeTFIDFSum += tfIDF;
         }
         i++;

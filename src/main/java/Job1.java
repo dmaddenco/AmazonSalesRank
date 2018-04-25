@@ -1,17 +1,17 @@
 import com.fasterxml.jackson.core.JsonParser;
-import org.apache.hadoop.io.IntWritable;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
-//import org.json.simple.*;
-//import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
-import java.util.HashMap;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.StringTokenizer;
+
+//import org.json.simple.*;
+//import com.fasterxml.jackson.databind.ObjectMapper;
 
 class Job1 {
   /**
