@@ -21,7 +21,7 @@ class Job3 {
     private final Text compValue = new Text();
 
     public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
-      Set<String> uniqueASIN = new HashSet<>();
+      Set<String> uniqueASIN = new HashSet<String>();
       String[] valueArray = value.toString().split("\t");
 
       String asin = valueArray[0];

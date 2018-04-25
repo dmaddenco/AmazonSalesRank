@@ -12,7 +12,7 @@ import java.util.HashSet;
 import java.util.StringTokenizer;
 
 class Job2 {
-  private static final HashSet<String> stopWords = new HashSet<>();
+  private static final HashSet<String> stopWords = new HashSet<String>();
 
   /**
    * Map results from first MapReduce job to new < key, value > pair

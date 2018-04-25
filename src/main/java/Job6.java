@@ -45,7 +45,7 @@ class Job6 {
     private final Text rangeTFIDFValue = new Text();
 
     public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
-      TreeMap<Double, String> productTFIDF = new TreeMap<>();
+      TreeMap<Double, String> productTFIDF = new TreeMap<Double, String>();
       salesRankKey.set(key);
       double rangeTFIDFSum = 0;
 
