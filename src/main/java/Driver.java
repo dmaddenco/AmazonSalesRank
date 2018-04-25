@@ -25,13 +25,7 @@ public class Driver {
   public static class PartitionerAsin extends Partitioner<Text, Text> {
     @Override
     public int getPartition(Text key, Text value, int numReduceTasks) {
-//      System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!GOT HERE");
-//      System.out.println("*******************************************KEY:" + key.toString() + " VALUE: " + value.toString());
-      BigInteger temp = new BigInteger(key.toString());
-      BigInteger temp2 = new BigInteger("32");
-      BigInteger val = temp.mod(temp2);
-      //System.out.println("*******************************************KEY:" + key.toString() + " VALUE: " + val);
-      return val.intValue();
+      return Math.abs(key.toString().hashCode() % numReduceTasks);
     }
   }
 

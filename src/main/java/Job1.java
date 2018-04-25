@@ -26,6 +26,7 @@ class Job1 {
     private final static Text rank = new Text();
 
     public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
+      /*
       String meta = value.toString();
       if (!meta.isEmpty()) {
         if (meta.contains("asin") && meta.contains("'salesRank': {'Electronics':")) {
@@ -47,8 +48,8 @@ class Job1 {
           context.write(asinKey, rank);
         }
       }
+      */
 
-      /*
       HashMap<String, Object> map = new ObjectMapper().configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true)
               .configure(JsonParser.Feature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER, true)
               .readValue(value.toString(), HashMap.class);
@@ -79,7 +80,6 @@ class Job1 {
         rank.set(salesRank);
         context.write(asinKey, rank);
       }
-      */
     }
   }
 
