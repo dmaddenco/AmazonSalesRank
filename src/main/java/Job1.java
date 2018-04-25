@@ -1,17 +1,17 @@
 import com.fasterxml.jackson.core.JsonParser;
-import org.apache.hadoop.io.IntWritable;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
-//import org.json.simple.*;
-//import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
-import java.util.HashMap;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.StringTokenizer;
+
+//import org.json.simple.*;
+//import com.fasterxml.jackson.databind.ObjectMapper;
 
 class Job1 {
   /**
@@ -26,6 +26,7 @@ class Job1 {
     private final static Text rank = new Text();
 
     public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
+      /*
       String meta = value.toString();
       if (!meta.isEmpty()) {
         if (meta.contains("asin") && meta.contains("'salesRank': {'Electronics':")) {
@@ -47,8 +48,8 @@ class Job1 {
           context.write(asinKey, rank);
         }
       }
+      */
 
-      /*
       HashMap<String, Object> map = new ObjectMapper().configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true)
               .configure(JsonParser.Feature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER, true)
               .readValue(value.toString(), HashMap.class);
@@ -79,7 +80,6 @@ class Job1 {
         rank.set(salesRank);
         context.write(asinKey, rank);
       }
-      */
     }
   }
 

@@ -44,7 +44,7 @@ class Job4 {
     private final Text compValue = new Text();
 
     public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
-      ArrayList<String> valuesCopy = new ArrayList<String>();
+      ArrayList<String> valuesCopy = new ArrayList<>();
       double ni;
 
       for (Text val : values) {

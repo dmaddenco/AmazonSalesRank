@@ -1,4 +1,3 @@
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -9,10 +8,11 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URI;
-import java.util.*;
+import java.util.HashSet;
+import java.util.StringTokenizer;
 
 class Job2 {
-  private static HashSet<String> stopWords = new HashSet<String>();
+  private static final HashSet<String> stopWords = new HashSet<>();
 
   /**
    * Map results from first MapReduce job to new < key, value > pair
@@ -24,9 +24,7 @@ class Job2 {
   static class Job2Mapper extends Mapper<LongWritable, Text, Text, Text> {
     private final Text compKey = new Text();
     private final Text compValue = new Text();
-    
-    private Text testKey = new Text();
-    private Text testVal = new Text();
+
     /**
      * Read in from multiple inputs and store results in memory
      * File input contains stop words to be used as a filter in mapper
@@ -42,10 +40,10 @@ class Job2 {
           for (URI cacheFile1 : cacheFiles) {
             try {
               File cacheFile = new File(cacheFile1.getPath());
-              
+
               reader = new BufferedReader(new FileReader(cacheFile.getName()));
               String line;
-              
+
               while ((line = reader.readLine()) != null) {
                 line = line.toLowerCase().replaceAll("[^a-z0-9 ]", "");
                 stopWords.add(line);
@@ -68,24 +66,24 @@ class Job2 {
 
     public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
       String[] inputArray = value.toString().split("\t");
-      
+
       if (inputArray.length >= 3) {
         String asin = inputArray[0];
         String reviews = inputArray[1];
         String salesRank = inputArray[2];
         String[] sentences = reviews.split("\\.");
-        
+
         for (String sentence : sentences) {
           if (!sentence.equals("")) {
             StringTokenizer itrWord = new StringTokenizer(sentence);
 
             while (itrWord.hasMoreTokens()) {
               String unigram = itrWord.nextToken().toLowerCase().replaceAll("[^a-z0-9 ]", "");
-              
-              if(!stopWords.contains(unigram)){
-              compKey.set(asin + "\t" + unigram);
-              compValue.set(1 + "\t" + salesRank);
-              context.write(compKey, compValue);
+
+              if (!stopWords.contains(unigram)) {
+                compKey.set(asin + "\t" + unigram);
+                compValue.set(1 + "\t" + salesRank);
+                context.write(compKey, compValue);
               }
             }
           }

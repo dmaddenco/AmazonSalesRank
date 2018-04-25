@@ -22,7 +22,7 @@ public class Driver {
     }
   }
 
-  public static class PartitionerAsin extends Partitioner<Text, Text> {
+  private static class PartitionerAsin extends Partitioner<Text, Text> {
     @Override
     public int getPartition(Text key, Text value, int numReduceTasks) {
 //      System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!GOT HERE");
@@ -42,7 +42,7 @@ public class Driver {
    * @param Text value is ProductTF-IDFvalue
    * @returns partition value based on salesRank
    */
-  public static class SalesRankPartitioner extends Partitioner<Text, Text> {
+  private static class SalesRankPartitioner extends Partitioner<Text, Text> {
     @Override
     public int getPartition(Text key, Text value, int numReduceTasks) {
       return Math.abs(key.toString().hashCode() % numReduceTasks);
@@ -103,8 +103,8 @@ public class Driver {
       FileSystem fs = FileSystem.get(conf);
       FileStatus[] fileList = fs.listStatus(stopWordsInputPath);
 
-      for (int i = 0; i < fileList.length; i++) {
-        job2.addCacheFile(fileList[i].getPath().toUri());
+      for (FileStatus aFileList : fileList) {
+        job2.addCacheFile(aFileList.getPath().toUri());
       }
 
       FileInputFormat.addInputPath(job2, outputPathTemp1);
