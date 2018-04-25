@@ -127,6 +127,7 @@ public class Driver {
         FileOutputFormat.setOutputPath(job3, outputPathTemp3);
 
         if (job3.waitForCompletion(true)) {
+          Counter someCount = job3.getCounters().findCounter(CountersClass.N_COUNTERS.SOMECOUNT);
 
           job4.setJarByClass(Driver.class);
           job4.setNumReduceTasks(numReduceTask);
@@ -143,6 +144,7 @@ public class Driver {
           FileOutputFormat.setOutputPath(job4, outputPathTemp4);
 
           if (job4.waitForCompletion(true)) {
+            job5.getConfiguration().setLong(CountersClass.N_COUNTERS.SOMECOUNT.name(), someCount.getValue());
 
             job5.setJarByClass(Driver.class);
             job5.setNumReduceTasks(numReduceTask);
@@ -155,8 +157,6 @@ public class Driver {
             job5.setOutputKeyClass(Text.class);
             job5.setOutputValueClass(Text.class);
 
-            Counter someCount = job3.getCounters().findCounter(CountersClass.N_COUNTERS.SOMECOUNT);
-            job5.getConfiguration().setLong(CountersClass.N_COUNTERS.SOMECOUNT.name(), someCount.getValue());
 
             FileInputFormat.addInputPath(job5, outputPathTemp4);
             FileOutputFormat.setOutputPath(job5, outputPathTemp5);
