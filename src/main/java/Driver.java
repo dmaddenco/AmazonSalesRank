@@ -30,7 +30,7 @@ public class Driver {
   }
 
   /**
-   * Parition based on salesRank value
+   * Partition based on salesRank value
    *
    * @param Text key is salesRank
    * @param Text value is ProductTF-IDFvalue
