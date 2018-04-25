@@ -64,6 +64,7 @@ public class Driver {
     Path outputPathTemp4 = new Path(args[4] + "Temp4");
     Path outputPathTemp5 = new Path(args[4] + "Temp5");
     Path outputPathTemp6 = new Path(args[4] + "Temp6");
+    Path outputPathTemp7 = new Path(args[4] + "Temp7");
     Path outputPath = new Path(args[4]);
 
     //create all job objects
@@ -73,6 +74,7 @@ public class Driver {
     Job job4 = Job.getInstance(conf, "tp_job4");
     Job job5 = Job.getInstance(conf, "tp_job5");
     Job job6 = Job.getInstance(conf, "tp_job6");
+    Job job7 = Job.getInstance(conf, "tp_job7");
 
     job1.setJarByClass(Driver.class);
     job1.setNumReduceTasks(numReduceTask);
@@ -175,7 +177,26 @@ public class Driver {
               FileInputFormat.addInputPath(job6, outputPathTemp5);
               FileOutputFormat.setOutputPath(job6, outputPathTemp6);
 
-              System.exit(job6.waitForCompletion(true) ? 0 : 1);
+//              System.exit(job6.waitForCompletion(true) ? 0 : 1);
+              if (job6.waitForCompletion(true)) {
+
+                job7.setJarByClass(Driver.class);
+                job7.setNumReduceTasks(numReduceTask);
+                job7.setPartitionerClass(SalesRankPartitioner.class);
+
+                job7.setMapperClass(Job7.Job7Mapper.class);
+                job7.setReducerClass(Job7.Job7Reducer.class);
+
+                job7.setMapOutputKeyClass(Text.class);
+                job7.setMapOutputValueClass(Text.class);
+                job7.setOutputKeyClass(Text.class);
+                job7.setOutputValueClass(Text.class);
+
+                FileInputFormat.addInputPath(job7, outputPathTemp6);
+                FileOutputFormat.setOutputPath(job7, outputPathTemp7);
+
+                System.exit(job7.waitForCompletion(true) ? 0 : 1);
+              }
             }
           }
         }
