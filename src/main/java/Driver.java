@@ -2,24 +2,16 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.fs.PathFilter;
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Partitioner;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.MultipleInputs;
+import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
-import java.math.*;
-
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
+import java.math.BigInteger;
 
 
 public class Driver {
@@ -33,13 +25,27 @@ public class Driver {
   public static class PartitionerAsin extends Partitioner<Text, Text> {
     @Override
     public int getPartition(Text key, Text value, int numReduceTasks) {
-      System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!GOT HERE");
-      System.out.println("*******************************************KEY:" + key.toString() + " VALUE: " + value.toString());
+//      System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!GOT HERE");
+//      System.out.println("*******************************************KEY:" + key.toString() + " VALUE: " + value.toString());
       BigInteger temp = new BigInteger(key.toString());
       BigInteger temp2 = new BigInteger("32");
       BigInteger val = temp.mod(temp2);
       //System.out.println("*******************************************KEY:" + key.toString() + " VALUE: " + val);
       return val.intValue();
+    }
+  }
+
+  /**
+   * Parition based on salesRank value
+   *
+   * @param Text key is salesRank
+   * @param Text value is ProductTF-IDFvalue
+   * @returns partition value based on salesRank
+   */
+  public static class SalesRankPartitioner extends Partitioner<Text, Text> {
+    @Override
+    public int getPartition(Text key, Text value, int numReduceTasks) {
+      return Math.abs(key.toString().hashCode() % numReduceTasks);
     }
   }
 
@@ -57,6 +63,7 @@ public class Driver {
     Path outputPathTemp3 = new Path(args[4] + "Temp3");
     Path outputPathTemp4 = new Path(args[4] + "Temp4");
     Path outputPathTemp5 = new Path(args[4] + "Temp5");
+    Path outputPathTemp6 = new Path(args[4] + "Temp6");
     Path outputPath = new Path(args[4]);
 
     //create all job objects
@@ -65,10 +72,10 @@ public class Driver {
     Job job3 = Job.getInstance(conf, "tp_job3");
     Job job4 = Job.getInstance(conf, "tp_job4");
     Job job5 = Job.getInstance(conf, "tp_job5");
+    Job job6 = Job.getInstance(conf, "tp_job6");
 
     job1.setJarByClass(Driver.class);
     job1.setNumReduceTasks(numReduceTask);
-    //job1.setPartitionerClass(PartitionerAsin.class);
 
     job1.setMapperClass(Job1.Job1Mapper.class);
     job1.setReducerClass(Job1.Job1Reducer.class);
@@ -82,8 +89,7 @@ public class Driver {
     if (job1.waitForCompletion(true)) {
       job2.setJarByClass(Driver.class);
       job2.setNumReduceTasks(numReduceTask);
-      //job2.setPartitionerClass(PartitionerAsin.class);
-      
+
       job2.setMapperClass(Job2.Job2Mapper.class);
       job2.setReducerClass(Job2.Job2Reducer.class);
 
@@ -91,23 +97,22 @@ public class Driver {
       job2.setMapOutputValueClass(Text.class);
       job2.setOutputKeyClass(Text.class);
       job2.setOutputValueClass(Text.class);
-      
+
       FileSystem fs = FileSystem.get(conf);
-    FileStatus[] fileList = fs.listStatus(new Path(args[1]));
-    
-    for(int i=0; i < fileList.length;i++){ 
+      FileStatus[] fileList = fs.listStatus(stopWordsInputPath);
+
+      for (int i = 0; i < fileList.length; i++) {
         job2.addCacheFile(fileList[i].getPath().toUri());
-    }
+      }
 
       FileInputFormat.addInputPath(job2, outputPathTemp1);
       FileOutputFormat.setOutputPath(job2, outputPathTemp2);
-      
+
       if (job2.waitForCompletion(true)) {
 
         job3.setJarByClass(Driver.class);
         job3.setNumReduceTasks(numReduceTask);
-        //job3.setPartitionerClass(PartitionerAsin.class);
-        
+
         job3.setMapperClass(Job3.Job3Mapper.class);
         job3.setReducerClass(Job3.Job3Reducer.class);
 
@@ -119,7 +124,6 @@ public class Driver {
         FileInputFormat.addInputPath(job3, outputPathTemp2);
         FileOutputFormat.setOutputPath(job3, outputPathTemp3);
 
-        //System.exit(job3.waitForCompletion(true) ? 0 : 1);
         if (job3.waitForCompletion(true)) {
 
           job4.setJarByClass(Driver.class);
@@ -136,13 +140,11 @@ public class Driver {
           FileInputFormat.addInputPath(job4, outputPathTemp3);
           FileOutputFormat.setOutputPath(job4, outputPathTemp4);
 
-          //System.exit(job4.waitForCompletion(true) ? 0 : 1);
           if (job4.waitForCompletion(true)) {
-            
+
             job5.setJarByClass(Driver.class);
             job5.setNumReduceTasks(numReduceTask);
-            //job5.setPartitionerClass(PartitionerAsin.class);
-            
+
             job5.setMapperClass(Job5.Job5Mapper.class);
             job5.setReducerClass(Job5.Job5Reducer.class);
 
@@ -150,13 +152,31 @@ public class Driver {
             job5.setMapOutputValueClass(Text.class);
             job5.setOutputKeyClass(Text.class);
             job5.setOutputValueClass(Text.class);
-            
+
             Counter someCount = job3.getCounters().findCounter(CountersClass.N_COUNTERS.SOMECOUNT);
             job5.getConfiguration().setLong(CountersClass.N_COUNTERS.SOMECOUNT.name(), someCount.getValue());
 
             FileInputFormat.addInputPath(job5, outputPathTemp4);
             FileOutputFormat.setOutputPath(job5, outputPathTemp5);
-            System.exit(job5.waitForCompletion(true) ? 0 : 1);
+            if (job5.waitForCompletion(true)) {
+
+              job6.setJarByClass(Driver.class);
+              job6.setNumReduceTasks(numReduceTask);
+              job6.setPartitionerClass(SalesRankPartitioner.class);
+
+              job6.setMapperClass(Job6.Job6Mapper.class);
+              job6.setReducerClass(Job6.Job6Reducer.class);
+
+              job6.setMapOutputKeyClass(Text.class);
+              job6.setMapOutputValueClass(Text.class);
+              job6.setOutputKeyClass(Text.class);
+              job6.setOutputValueClass(Text.class);
+
+              FileInputFormat.addInputPath(job6, outputPathTemp5);
+              FileOutputFormat.setOutputPath(job6, outputPathTemp6);
+
+              System.exit(job6.waitForCompletion(true) ? 0 : 1);
+            }
           }
         }
       }
