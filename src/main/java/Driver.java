@@ -236,6 +236,13 @@ public class Driver {
                     job9.setOutputKeyClass(Text.class);
                     job9.setOutputValueClass(IntWritable.class);
 
+                    FileSystem fs1 = FileSystem.get(conf);
+                    FileStatus[] fileList1 = fs1.listStatus(stopWordsInputPath);
+
+                    for (FileStatus aFileList : fileList1) {
+                      job9.addCacheFile(aFileList.getPath().toUri());
+                    }
+
                     FileInputFormat.addInputPath(job9, outputPathTemp8);
                     FileOutputFormat.setOutputPath(job9, outputPathTemp9);
 
@@ -321,9 +328,9 @@ public class Driver {
                               job14.setOutputValueClass(Text.class);
 
                               FileSystem FS = FileSystem.get(conf);
-                              FileStatus[] fileList1 = FS.listStatus(outputPathTemp7);
+                              FileStatus[] fileList2 = FS.listStatus(outputPathTemp7);
 
-                              for (FileStatus aFileList : fileList1) {
+                              for (FileStatus aFileList : fileList2) {
                                 job14.addCacheFile(aFileList.getPath().toUri());
                               }
 

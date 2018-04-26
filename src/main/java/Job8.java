@@ -3,11 +3,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 class Job8 {
@@ -57,7 +54,7 @@ class Job8 {
 
     public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
       for (Text v : values) {
-       context.write(key, v);
+        context.write(key, v);
       }
     }
   }
