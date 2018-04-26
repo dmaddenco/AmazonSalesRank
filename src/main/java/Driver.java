@@ -2,6 +2,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Counter;
@@ -332,7 +333,12 @@ public class Driver {
                               job14.setOutputValueClass(Text.class);
 
                               FileSystem FS = FileSystem.get(conf);
-                              FileStatus[] fileList2 = FS.listStatus(outputPathTraining);
+                              FileStatus[] fileList2 = FS.listStatus((outputPathTraining),
+                                      new PathFilter() {
+                                        public boolean accept(Path path) {
+                                          return path.getName().startsWith("part-");
+                                        }
+                                      });
 
                               for (FileStatus aFileList : fileList2) {
                                 job14.addCacheFile(aFileList.getPath().toUri());
