@@ -86,7 +86,8 @@ public class Driver {
     Job job10 = Job.getInstance(conf, "tp_job10");
     Job job11 = Job.getInstance(conf, "tp_job11");
     Job job12 = Job.getInstance(conf, "tp_job12");
-    //Job job14 = Job.getInstance(conf, "tp_job14");
+    Job job13 = Job.getInstance(conf, "tp_job13");
+    Job job14 = Job.getInstance(conf, "tp_job14");
 
     job1.setJarByClass(Driver.class);
     job1.setNumReduceTasks(numReduceTask);
@@ -288,6 +289,50 @@ public class Driver {
 
                           FileInputFormat.addInputPath(job12, outputPathTemp11);
                           FileOutputFormat.setOutputPath(job12, outputPathTemp12);
+
+                          if (job12.waitForCompletion(true)) {
+
+                            job13.setJarByClass(Driver.class);
+                            job13.setNumReduceTasks(numReduceTask);
+                            job13.setPartitionerClass(SalesRankPartitioner.class);
+
+                            job13.setMapperClass(Job13.Job13Mapper.class);
+                            job13.setReducerClass(Job13.Job13Reducer.class);
+
+                            job13.setMapOutputKeyClass(Text.class);
+                            job13.setMapOutputValueClass(Text.class);
+                            job13.setOutputKeyClass(Text.class);
+                            job13.setOutputValueClass(Text.class);
+
+                            FileInputFormat.addInputPath(job13, outputPathTemp12);
+                            FileOutputFormat.setOutputPath(job13, outputPathTemp13);
+
+                            if (job13.waitForCompletion(true)) {
+
+                              job14.setJarByClass(Driver.class);
+                              job14.setNumReduceTasks(numReduceTask);
+
+                              job14.setMapperClass(Job14.Job14Mapper.class);
+                              job14.setReducerClass(Job14.Job14Reducer.class);
+
+                              job14.setMapOutputKeyClass(Text.class);
+                              job14.setMapOutputValueClass(Text.class);
+                              job14.setOutputKeyClass(Text.class);
+                              job14.setOutputValueClass(Text.class);
+
+                              FileSystem FS = FileSystem.get(conf);
+                              FileStatus[] fileList1 = FS.listStatus(outputPathTemp7);
+
+                              for (FileStatus aFileList : fileList1) {
+                                job14.addCacheFile(aFileList.getPath().toUri());
+                              }
+
+                              FileInputFormat.addInputPath(job14, outputPathTemp13);
+                              FileOutputFormat.setOutputPath(job14, outputPathTesting);
+
+                              System.exit(job14.waitForCompletion(true) ? 0 : 1);
+                            }
+                          }
                         }
                       }
                     }
@@ -301,27 +346,3 @@ public class Driver {
     }
   }
 }
-/*
-                    job14.setJarByClass(Driver.class);
-                    job14.setNumReduceTasks(numReduceTask);
-
-                    job14.setMapperClass(Job14.Job14Mapper.class);
-                    job14.setReducerClass(Job14.Job14Reducer.class);
-
-                    job14.setMapOutputKeyClass(Text.class);
-                    job14.setMapOutputValueClass(Text.class);
-                    job14.setOutputKeyClass(Text.class);
-                    job14.setOutputValueClass(Text.class);
-
-                    FileSystem FS = FileSystem.get(conf);
-                    FileStatus[] fileList1 = FS.listStatus(outputPathTemp7);
-
-                    for (FileStatus aFileList : fileList1) {
-                        job14.addCacheFile(aFileList.getPath().toUri());
-                    }
-
-                    FileInputFormat.addInputPath(job14, outputPathTemp13);
-                    FileOutputFormat.setOutputPath(job14, outputPathTemp14);
-
-                    System.exit(job14.waitForCompletion(true) ? 0 : 1);
-                */
