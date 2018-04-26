@@ -2,6 +2,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.Job;
@@ -81,6 +82,7 @@ public class Driver {
     Job job6 = Job.getInstance(conf, "tp_job6");
     Job job7 = Job.getInstance(conf, "tp_job7");
     Job job8 = Job.getInstance(conf, "tp_job8");
+    Job job9 = Job.getInstance(conf, "tp_job9");
     //Job job14 = Job.getInstance(conf, "tp_job14");
 
     job1.setJarByClass(Driver.class);
@@ -167,6 +169,7 @@ public class Driver {
 
             FileInputFormat.addInputPath(job5, outputPathTemp4);
             FileOutputFormat.setOutputPath(job5, outputPathTemp5);
+
             if (job5.waitForCompletion(true)) {
 
               job6.setJarByClass(Driver.class);
@@ -184,7 +187,6 @@ public class Driver {
               FileInputFormat.addInputPath(job6, outputPathTemp5);
               FileOutputFormat.setOutputPath(job6, outputPathTemp6);
 
-//              System.exit(job6.waitForCompletion(true) ? 0 : 1);
               if (job6.waitForCompletion(true)) {
                 job7.getConfiguration().setLong(CountersClass.N_COUNTERS.SOMECOUNT.name(), numReduceTask);
 
@@ -203,8 +205,38 @@ public class Driver {
                 FileInputFormat.addInputPath(job7, outputPathTemp6);
                 FileOutputFormat.setOutputPath(job7, outputPathTemp7);
 
-                System.exit(job7.waitForCompletion(true) ? 0 : 1);
-                
+                if (job7.waitForCompletion(true)) {
+
+                  job8.setJarByClass(Driver.class);
+                  job8.setNumReduceTasks(numReduceTask);
+                  job8.setPartitionerClass(PartitionerAsin.class);
+
+                  job8.setMapperClass(Job8.Job8Mapper.class);
+                  job8.setReducerClass(Job8.Job8Reducer.class);
+
+                  job8.setOutputKeyClass(Text.class);
+                  job8.setOutputValueClass(Text.class);
+
+                  FileInputFormat.addInputPath(job8, reviewDataInputPathTesting);
+                  FileOutputFormat.setOutputPath(job8, outputPathTemp8);
+
+                  if (job8.waitForCompletion(true)) {
+
+                    job9.setJarByClass(Driver.class);
+                    job9.setNumReduceTasks(numReduceTask);
+                    job9.setPartitionerClass(PartitionerAsin.class);
+
+                    job9.setMapperClass(Job9.Job9Mapper.class);
+                    job9.setReducerClass(Job9.Job9Reducer.class);
+
+                    job9.setOutputKeyClass(Text.class);
+                    job9.setOutputValueClass(IntWritable.class);
+
+                    FileInputFormat.addInputPath(job9, outputPathTemp8);
+                    FileOutputFormat.setOutputPath(job9, outputPathTemp9);
+
+                  }
+                }
                 /*
                     job14.setJarByClass(Driver.class);
                     job14.setNumReduceTasks(numReduceTask);
