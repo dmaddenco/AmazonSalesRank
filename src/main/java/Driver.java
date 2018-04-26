@@ -65,16 +65,16 @@ public class Driver {
     Path outputPathTemp4 = new Path(args[4] + "Temp4");
     Path outputPathTemp5 = new Path(args[4] + "Temp5");
     Path outputPathTemp6 = new Path(args[4] + "Temp6");
-
     Path outputPathTraining = new Path(args[4]);
+
     Path reviewDataInputPathTesting = new Path(args[5]);
-    Path outputPathTesting = new Path(args[6]);
     Path outputPathTemp8 = new Path(args[6] + "Temp8");
     Path outputPathTemp9 = new Path(args[6] + "Temp9");
     Path outputPathTemp10 = new Path(args[6] + "Temp10");
     Path outputPathTemp11 = new Path(args[6] + "Temp11");
     Path outputPathTemp12 = new Path(args[6] + "Temp12");
     Path outputPathTemp13 = new Path(args[6] + "Temp13");
+    Path outputPathTesting = new Path(args[6]);
 
 
     //create all job objects
