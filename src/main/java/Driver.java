@@ -84,6 +84,7 @@ public class Driver {
     Job job8 = Job.getInstance(conf, "tp_job8");
     Job job9 = Job.getInstance(conf, "tp_job9");
     Job job10 = Job.getInstance(conf, "tp_job10");
+    Job job11 = Job.getInstance(conf, "tp_job11");
     //Job job14 = Job.getInstance(conf, "tp_job14");
 
     job1.setJarByClass(Driver.class);
@@ -252,6 +253,24 @@ public class Driver {
                       FileInputFormat.addInputPath(job10, outputPathTemp9);
                       FileOutputFormat.setOutputPath(job10, outputPathTemp10);
 
+                      if (job10.waitForCompletion(true)) {
+                        Counter someCountTesting = job10.getCounters().findCounter(CountersClass.N_COUNTERS.SOMECOUNT);
+
+                        job11.setJarByClass(Driver.class);
+                        job11.setNumReduceTasks(numReduceTask);
+
+                        job11.setMapperClass(Job11.Job11Mapper.class);
+                        job11.setReducerClass(Job11.Job11Reducer.class);
+
+                        job11.setMapOutputKeyClass(Text.class);
+                        job11.setMapOutputValueClass(Text.class);
+                        job11.setOutputKeyClass(Text.class);
+                        job11.setOutputValueClass(Text.class);
+
+                        FileInputFormat.addInputPath(job11, outputPathTemp10);
+                        FileOutputFormat.setOutputPath(job11, outputPathTemp11);
+
+                      }
                     }
                   }
                 }
