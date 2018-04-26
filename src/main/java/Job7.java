@@ -4,6 +4,9 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.TreeMap;
 
 class Job7 {
 
@@ -39,6 +42,8 @@ class Job7 {
       String tfidf = values[1];
 
       double dummyKey = Math.abs(rank.hashCode() % numReduceTasks);
+//      double dummyKey = Math.abs(tfidf.hashCode() % numReduceTasks);
+//      double dummyKey = numReduceTasks;
 
       partKey.set(Double.toString(dummyKey));
       comKey.set(rank + "\t" + tfidf);
@@ -52,7 +57,33 @@ class Job7 {
 
 
     public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
+      /*TreeMap<Double, String> ranks = new TreeMap<Double, String>();
+      ArrayList<String> ranksOutput = new ArrayList<String>();
 
+      for (Text val : values) {
+        String[] valueSplit = val.toString().split("\t");
+        String rank = valueSplit[0];
+        double tfidf = Double.parseDouble(valueSplit[1]);
+
+        ranks.put(tfidf, rank);
+      }
+
+      int rangeSize = ranks.size() / Integer.parseInt(key.toString());
+
+      for (Map.Entry<Double, String> entry : ranks.entrySet()) {
+        double tfIDF = entry.getKey();
+        String rank = entry.getValue();
+
+        while (ranksOutput.size() < rangeSize) {
+          ranksOutput.add(rank + "\t" + Double.toString(tfIDF));
+        }
+
+        if (ranksOutput.size() == rangeSize) {
+          ranksOutput = new ArrayList<String>();
+        }
+      }
+
+      */
       long maxRank = 0;
       long minRank = Long.MAX_VALUE;
       double maxtfidf = 0;

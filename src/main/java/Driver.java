@@ -47,7 +47,7 @@ public class Driver {
     @Override
     public int getPartition(Text key, Text value, int numReduceTasks) {
       String[] valueParts = value.toString().split("\t");
-      return Math.abs(valueParts[0].hashCode() % numReduceTasks);
+      return Math.abs(valueParts[1].hashCode() % numReduceTasks);
     }
   }
 
