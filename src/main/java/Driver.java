@@ -182,7 +182,7 @@ public class Driver {
 
               job6.setJarByClass(Driver.class);
               job6.setNumReduceTasks(numReduceTask);
-              job6.setPartitionerClass(SalesRankPartitioner.class);
+//              job6.setPartitionerClass(SalesRankPartitioner.class);
 
               job6.setMapperClass(Job6.Job6Mapper.class);
               job6.setReducerClass(Job6.Job6Reducer.class);
@@ -305,7 +305,7 @@ public class Driver {
 
                             job13.setJarByClass(Driver.class);
                             job13.setNumReduceTasks(numReduceTask);
-                            job13.setPartitionerClass(SalesRankPartitioner.class);
+//                            job13.setPartitionerClass(SalesRankPartitioner.class);
 
                             job13.setMapperClass(Job13.Job13Mapper.class);
                             job13.setReducerClass(Job13.Job13Reducer.class);
