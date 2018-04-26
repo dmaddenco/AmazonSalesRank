@@ -21,7 +21,7 @@ class Job13 {
     public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
       String[] values = value.toString().split("\t");
 
-      if (values.length == 5) {
+      if (values.length == 4) {
         String asin = values[0];
 //        String unigram = values[1];
 //        String tfValue = values[2];

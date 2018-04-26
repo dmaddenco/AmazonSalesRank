@@ -4,6 +4,9 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.TreeMap;
 
 class Job7 {
 
@@ -52,7 +55,6 @@ class Job7 {
 
 
     public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
-
       long maxRank = 0;
       long minRank = Long.MAX_VALUE;
       double maxtfidf = 0;
