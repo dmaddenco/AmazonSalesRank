@@ -26,8 +26,7 @@ class Job14 {
      * @param context contains count value from driver
      */
     @Override
-    protected void setup(Context context) throws IOException,
-            InterruptedException {
+    protected void setup(Context context) throws IOException {
       URI[] cacheFiles = context.getCacheFiles();
       if (cacheFiles != null && cacheFiles.length > 0) {
         try {
