@@ -49,8 +49,8 @@ public class Driver {
 
     //create all path variables
     Path stopWordsInputPath = new Path(args[1]);
-    Path metaDataInputPath = new Path(args[2]);
-    Path reviewDataInputPath = new Path(args[3]);
+    Path metaDataInputPathTraining = new Path(args[2]);
+    Path reviewDataInputPathTraining = new Path(args[3]);
     Path outputPathTemp1 = new Path(args[4] + "Temp1");
     Path outputPathTemp2 = new Path(args[4] + "Temp2");
     Path outputPathTemp3 = new Path(args[4] + "Temp3");
@@ -58,7 +58,17 @@ public class Driver {
     Path outputPathTemp5 = new Path(args[4] + "Temp5");
     Path outputPathTemp6 = new Path(args[4] + "Temp6");
     Path outputPathTemp7 = new Path(args[4] + "Temp7");
-    Path outputPath = new Path(args[4]);
+    Path outputPathTraining = new Path(args[4]);
+    Path metaDataInputPathTesting = new Path(args[5]);
+    Path reviewDataInputPathTesting = new Path(args[6]);
+    Path outputPathTesting = new Path(args[7]);
+    Path outputPathTemp8 = new Path(args[7] + "Temp8");
+    Path outputPathTemp9 = new Path(args[7] + "Temp9");
+    Path outputPathTemp10 = new Path(args[7] + "Temp10");
+    Path outputPathTemp11 = new Path(args[7] + "Temp11");
+    Path outputPathTemp12 = new Path(args[7] + "Temp12");
+    Path outputPathTemp13 = new Path(args[7] + "Temp13");
+    Path outputPathTemp14 = new Path(args[7] + "Temp14");
 
     //create all job objects
     Job job1 = Job.getInstance(conf, "tp_job1");
@@ -68,6 +78,7 @@ public class Driver {
     Job job5 = Job.getInstance(conf, "tp_job5");
     Job job6 = Job.getInstance(conf, "tp_job6");
     Job job7 = Job.getInstance(conf, "tp_job7");
+    Job job8 = Job.getInstance(conf, "tp_job8");
 
     job1.setJarByClass(Driver.class);
     job1.setNumReduceTasks(numReduceTask);
@@ -77,8 +88,8 @@ public class Driver {
     job1.setOutputKeyClass(Text.class);
     job1.setOutputValueClass(Text.class);
 
-    MultipleInputs.addInputPath(job1, metaDataInputPath, TextInputFormat.class, Job1.Job0Mapper.class);
-    MultipleInputs.addInputPath(job1, reviewDataInputPath, TextInputFormat.class, Job1.Job1Mapper.class);
+    MultipleInputs.addInputPath(job1, metaDataInputPathTraining, TextInputFormat.class, Job1.Job0Mapper.class);
+    MultipleInputs.addInputPath(job1, reviewDataInputPathTraining, TextInputFormat.class, Job1.Job1Mapper.class);
     FileOutputFormat.setOutputPath(job1, outputPathTemp1);  //jobs write to intermediate output
 
     if (job1.waitForCompletion(true)) {
