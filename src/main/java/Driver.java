@@ -11,8 +11,6 @@ import org.apache.hadoop.mapreduce.lib.input.MultipleInputs;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
-import java.math.BigInteger;
-
 
 public class Driver {
 
@@ -39,7 +37,8 @@ public class Driver {
   private static class SalesRankPartitioner extends Partitioner<Text, Text> {
     @Override
     public int getPartition(Text key, Text value, int numReduceTasks) {
-      return Math.abs(key.toString().hashCode() % numReduceTasks);
+      String[] valueParts = value.toString().split("\t");
+      return Math.abs(valueParts[0].hashCode() % numReduceTasks);
     }
   }
 
@@ -173,6 +172,7 @@ public class Driver {
 
 //              System.exit(job6.waitForCompletion(true) ? 0 : 1);
               if (job6.waitForCompletion(true)) {
+                job7.getConfiguration().setLong(CountersClass.N_COUNTERS.SOMECOUNT.name(), numReduceTask);
 
                 job7.setJarByClass(Driver.class);
                 job7.setNumReduceTasks(numReduceTask);

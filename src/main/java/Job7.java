@@ -8,17 +8,29 @@ import java.io.IOException;
 class Job7 {
 
   /**
-   * Identity mapper
+   * Identity mapper that creates dummy key that represents partition
    *
    * @param LongWritable object that can be ignored
    * @param Text         object that contains all the output from previous MapReduce job
-   * @param salesRank    the sale's rank of the product
-   * @param TFIDF        the range-TFIDF value
-   * @return Key value pair < salesRank, TFIDF >
+   * @return Key value pair < dummyKey, {salesRank \t TFIDF} >
    */
   static class Job7Mapper extends Mapper<LongWritable, Text, Text, Text> {
-    private final Text salesRank = new Text();
-    private final Text TFIDF = new Text();
+    private final Text partKey = new Text();
+    private final Text comKey = new Text();
+
+    private long numReduceTasks;
+
+    /**
+     * Get number of reducers from context and set equal to local variable
+     *
+     * @param context contains count value from driver
+     */
+    @Override
+    protected void setup(Context context) throws IOException,
+            InterruptedException {
+      super.setup(context);
+      this.numReduceTasks = context.getConfiguration().getLong(Driver.CountersClass.N_COUNTERS.SOMECOUNT.name(), 0);
+    }
 
     public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
 
@@ -26,9 +38,11 @@ class Job7 {
       String rank = values[0];
       String tfidf = values[1];
 
-      salesRank.set(rank);
-      TFIDF.set(tfidf);
-      context.write(salesRank, TFIDF);
+      double dummyKey = Math.abs(rank.hashCode() % numReduceTasks);
+
+      partKey.set(Double.toString(dummyKey));
+      comKey.set(rank + "\t" + tfidf);
+      context.write(partKey, comKey);
     }
   }
 
@@ -45,8 +59,9 @@ class Job7 {
       double mintfidf = Double.MAX_VALUE;
 
       for (Text val : values) {
-        long tempRank = Long.parseLong(key.toString());
-        double tempTFIDF = Double.parseDouble(val.toString());
+        String[] valueSplit = val.toString().split("\t");
+        long tempRank = Long.parseLong(valueSplit[0]);
+        double tempTFIDF = Double.parseDouble(valueSplit[1]);
 
         if (tempRank > maxRank) {
           maxRank = tempRank;
