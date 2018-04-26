@@ -53,17 +53,15 @@ class Job6 {
         double tfIDF = Double.parseDouble(v.toString());
         if (!productTFIDF.containsKey(tfIDF)) {
           productTFIDF.put(tfIDF, key.toString());
+          if (productTFIDF.size() > 10) {
+            productTFIDF.remove(productTFIDF.firstKey());
+          }
         }
       }
 
-      int i = 0;
       for (Map.Entry<Double, String> entry : productTFIDF.entrySet()) {
-        if (i < 10) {
-          Double tfIDF = entry.getKey();
-//          String value = entry.getValue();
-          rangeTFIDFSum += tfIDF;
-        }
-        i++;
+        double tfIDF = entry.getKey();
+        rangeTFIDFSum += tfIDF;
       }
 
       rangeTFIDFValue.set(Double.toString(rangeTFIDFSum));
