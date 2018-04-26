@@ -284,7 +284,7 @@ public class Driver {
                         FileOutputFormat.setOutputPath(job11, outputPathTemp11);
 
                         if (job11.waitForCompletion(true)) {
-                          job12.getConfiguration().setLong(CountersClass.N_COUNTERS.SOMECOUNT.name(), someCount.getValue());
+                          job12.getConfiguration().setLong(CountersClass.N_COUNTERS.SOMECOUNT.name(), someCountTesting.getValue());
 
                           job12.setJarByClass(Driver.class);
                           job12.setNumReduceTasks(numReduceTask);
