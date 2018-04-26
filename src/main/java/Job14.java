@@ -67,7 +67,12 @@ class Job14 {
       double prodTFIDF = Double.parseDouble(values[1]);
 
       //rangeBins.put(prodTFIDF,asinNum);
-      double maxKey = rangeBins.higherKey(prodTFIDF);
+      double maxKey;
+      try {
+        maxKey = rangeBins.higherKey(prodTFIDF);
+      } catch (Exception e) {
+        maxKey = rangeBins.lastKey();
+      }
       String valRanges = rangeBins.get(maxKey);
       String[] part = valRanges.split("\t");
 

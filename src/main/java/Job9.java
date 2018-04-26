@@ -68,7 +68,7 @@ class Job9 {
     public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
       String[] inputArray = value.toString().split("\t");
 
-      if (inputArray.length >= 3) {
+      if (inputArray.length == 2) {
         String asin = inputArray[0];
         String reviews = inputArray[1];
         String[] sentences = reviews.split("\\.");

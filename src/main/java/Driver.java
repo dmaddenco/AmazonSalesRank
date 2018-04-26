@@ -28,6 +28,13 @@ public class Driver {
     }
   }
 
+  private static class PartitionerAsinInt extends Partitioner<Text, IntWritable> {
+    @Override
+    public int getPartition(Text key, IntWritable value, int numReduceTasks) {
+      return Math.abs(key.toString().hashCode() % numReduceTasks);
+    }
+  }
+
   /**
    * Partition based on salesRank value
    *
@@ -58,19 +65,16 @@ public class Driver {
     Path outputPathTemp4 = new Path(args[4] + "Temp4");
     Path outputPathTemp5 = new Path(args[4] + "Temp5");
     Path outputPathTemp6 = new Path(args[4] + "Temp6");
-    Path outputPathTemp7 = new Path(args[4] + "Temp7");
 
     Path outputPathTraining = new Path(args[4]);
-    Path metaDataInputPathTesting = new Path(args[5]);
-    Path reviewDataInputPathTesting = new Path(args[6]);
-    Path outputPathTesting = new Path(args[7]);
-    Path outputPathTemp8 = new Path(args[7] + "Temp8");
-    Path outputPathTemp9 = new Path(args[7] + "Temp9");
-    Path outputPathTemp10 = new Path(args[7] + "Temp10");
-    Path outputPathTemp11 = new Path(args[7] + "Temp11");
-    Path outputPathTemp12 = new Path(args[7] + "Temp12");
-    Path outputPathTemp13 = new Path(args[7] + "Temp13");
-    Path outputPathTemp14 = new Path(args[7] + "Temp14");
+    Path reviewDataInputPathTesting = new Path(args[5]);
+    Path outputPathTesting = new Path(args[6]);
+    Path outputPathTemp8 = new Path(args[6] + "Temp8");
+    Path outputPathTemp9 = new Path(args[6] + "Temp9");
+    Path outputPathTemp10 = new Path(args[6] + "Temp10");
+    Path outputPathTemp11 = new Path(args[6] + "Temp11");
+    Path outputPathTemp12 = new Path(args[6] + "Temp12");
+    Path outputPathTemp13 = new Path(args[6] + "Temp13");
 
 
     //create all job objects
@@ -207,7 +211,7 @@ public class Driver {
                 job7.setOutputValueClass(Text.class);
 
                 FileInputFormat.addInputPath(job7, outputPathTemp6);
-                FileOutputFormat.setOutputPath(job7, outputPathTemp7);
+                FileOutputFormat.setOutputPath(job7, outputPathTraining);
 
                 if (job7.waitForCompletion(true)) {
 
@@ -228,7 +232,7 @@ public class Driver {
 
                     job9.setJarByClass(Driver.class);
                     job9.setNumReduceTasks(numReduceTask);
-                    job9.setPartitionerClass(PartitionerAsin.class);
+                    job9.setPartitionerClass(PartitionerAsinInt.class);
 
                     job9.setMapperClass(Job9.Job9Mapper.class);
                     job9.setReducerClass(Job9.Job9Reducer.class);
@@ -328,7 +332,7 @@ public class Driver {
                               job14.setOutputValueClass(Text.class);
 
                               FileSystem FS = FileSystem.get(conf);
-                              FileStatus[] fileList2 = FS.listStatus(outputPathTemp7);
+                              FileStatus[] fileList2 = FS.listStatus(outputPathTraining);
 
                               for (FileStatus aFileList : fileList2) {
                                 job14.addCacheFile(aFileList.getPath().toUri());

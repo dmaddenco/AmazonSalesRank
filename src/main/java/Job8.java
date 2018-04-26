@@ -5,6 +5,7 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 class Job8 {
@@ -51,10 +52,23 @@ class Job8 {
    * @return < asin, { reviewText } >
    */
   static class Job8Reducer extends Reducer<Text, Text, Text, Text> {
+    private final static Text reviewValue = new Text();
 
     public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
-      for (Text v : values) {
-        context.write(key, v);
+      ArrayList<String> valuesArrayList = new ArrayList<String>();
+      String reviewText = "";
+
+      for (Text val : values) {
+        valuesArrayList.add(val.toString());
+      }
+
+      for (int i = 1; i < valuesArrayList.size(); i++) {
+        reviewText += valuesArrayList.get(i) + " ";
+      }
+
+      if (!reviewText.isEmpty()) {
+        reviewValue.set(reviewText);
+        context.write(key, reviewValue);
       }
     }
   }
