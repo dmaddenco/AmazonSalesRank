@@ -11,8 +11,6 @@ import org.apache.hadoop.mapreduce.lib.input.MultipleInputs;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
-import java.math.BigInteger;
-
 
 public class Driver {
 
@@ -22,30 +20,25 @@ public class Driver {
     }
   }
 
-  public static class PartitionerAsin extends Partitioner<Text, Text> {
+  private static class PartitionerAsin extends Partitioner<Text, Text> {
     @Override
     public int getPartition(Text key, Text value, int numReduceTasks) {
-//      System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!GOT HERE");
-//      System.out.println("*******************************************KEY:" + key.toString() + " VALUE: " + value.toString());
-      BigInteger temp = new BigInteger(key.toString());
-      BigInteger temp2 = new BigInteger("32");
-      BigInteger val = temp.mod(temp2);
-      //System.out.println("*******************************************KEY:" + key.toString() + " VALUE: " + val);
-      return val.intValue();
+      return Math.abs(key.toString().hashCode() % numReduceTasks);
     }
   }
 
   /**
-   * Parition based on salesRank value
+   * Partition based on salesRank value
    *
    * @param Text key is salesRank
    * @param Text value is ProductTF-IDFvalue
    * @returns partition value based on salesRank
    */
-  public static class SalesRankPartitioner extends Partitioner<Text, Text> {
+  private static class SalesRankPartitioner extends Partitioner<Text, Text> {
     @Override
     public int getPartition(Text key, Text value, int numReduceTasks) {
-      return Math.abs(key.toString().hashCode() % numReduceTasks);
+      String[] valueParts = value.toString().split("\t");
+      return Math.abs(valueParts[0].hashCode() % numReduceTasks);
     }
   }
 
@@ -103,8 +96,8 @@ public class Driver {
       FileSystem fs = FileSystem.get(conf);
       FileStatus[] fileList = fs.listStatus(stopWordsInputPath);
 
-      for (int i = 0; i < fileList.length; i++) {
-        job2.addCacheFile(fileList[i].getPath().toUri());
+      for (FileStatus aFileList : fileList) {
+        job2.addCacheFile(aFileList.getPath().toUri());
       }
 
       FileInputFormat.addInputPath(job2, outputPathTemp1);
@@ -127,6 +120,7 @@ public class Driver {
         FileOutputFormat.setOutputPath(job3, outputPathTemp3);
 
         if (job3.waitForCompletion(true)) {
+          Counter someCount = job3.getCounters().findCounter(CountersClass.N_COUNTERS.SOMECOUNT);
 
           job4.setJarByClass(Driver.class);
           job4.setNumReduceTasks(numReduceTask);
@@ -143,6 +137,7 @@ public class Driver {
           FileOutputFormat.setOutputPath(job4, outputPathTemp4);
 
           if (job4.waitForCompletion(true)) {
+            job5.getConfiguration().setLong(CountersClass.N_COUNTERS.SOMECOUNT.name(), someCount.getValue());
 
             job5.setJarByClass(Driver.class);
             job5.setNumReduceTasks(numReduceTask);
@@ -155,8 +150,6 @@ public class Driver {
             job5.setOutputKeyClass(Text.class);
             job5.setOutputValueClass(Text.class);
 
-            Counter someCount = job3.getCounters().findCounter(CountersClass.N_COUNTERS.SOMECOUNT);
-            job5.getConfiguration().setLong(CountersClass.N_COUNTERS.SOMECOUNT.name(), someCount.getValue());
 
             FileInputFormat.addInputPath(job5, outputPathTemp4);
             FileOutputFormat.setOutputPath(job5, outputPathTemp5);
@@ -179,6 +172,7 @@ public class Driver {
 
 //              System.exit(job6.waitForCompletion(true) ? 0 : 1);
               if (job6.waitForCompletion(true)) {
+                job7.getConfiguration().setLong(CountersClass.N_COUNTERS.SOMECOUNT.name(), numReduceTask);
 
                 job7.setJarByClass(Driver.class);
                 job7.setNumReduceTasks(numReduceTask);

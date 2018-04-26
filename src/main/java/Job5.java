@@ -4,14 +4,12 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 
 import java.io.IOException;
-import java.util.HashMap;
 
 class Job5 {
-  private static HashMap<String, String> idUniToValue = new HashMap<String, String>();
 
   /**
    * Map output from previous MapReduce job of < unigram, {asin \t TFValue \t ni \t salesRank} >
-   *   to new < key, value > pair and calculate IDF and TF-IDF values
+   * to new < key, value > pair and calculate IDF and TF-IDF values
    *
    * @param LongWritable object that can be ignored
    * @param Text         object that contains all the output from previous MapReduce job
@@ -25,13 +23,14 @@ class Job5 {
 
     /**
      * Get count value from context and set equal to local variable
+     *
      * @param context contains count value from driver
      */
     @Override
     protected void setup(Context context) throws IOException,
             InterruptedException {
       super.setup(context);
-      this.someCount  = context.getConfiguration().getLong(Driver.CountersClass.N_COUNTERS.SOMECOUNT.name(), 0);
+      this.someCount = context.getConfiguration().getLong(Driver.CountersClass.N_COUNTERS.SOMECOUNT.name(), 0);
     }
 
     public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
@@ -47,7 +46,7 @@ class Job5 {
       N = this.someCount;
       idf = Math.log10(N / ni);
       tfidf = tf * idf;
-      
+
       asinKey.set(asin);
       compValue.set(unigram + "\t" + tf + "\t" + tfidf + "\t" + salesRank);
       context.write(asinKey, compValue);
